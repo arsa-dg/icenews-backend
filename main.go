@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"icenews/backend/handler"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -19,9 +18,6 @@ func main() {
 		fmt.Println("Error while connecting to database!")
 	}
 	defer DB.Close(context.Background())
-
-	handler := handler.New(DB)
-	handler.DBMigrate()
 
 	router := chi.NewRouter()
 
