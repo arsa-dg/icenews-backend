@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"icenews/backend/routes"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -24,6 +25,8 @@ func main() {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("IceNews Backend"))
 	})
+
+	router.Mount("/auth", routes.AuthRoute(DB))
 
 	http.ListenAndServe(":8080", router)
 }
