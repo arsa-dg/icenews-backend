@@ -5,9 +5,6 @@ import (
 	"icenews/backend/helper"
 	"icenews/backend/repository"
 	"net/http"
-	"time"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
 type LoginField struct {
@@ -21,44 +18,83 @@ type responseOK struct {
 	Expires_at string `json:"expires_at"`
 }
 
+type responseBadRequest struct {
+	Message string `json:"message"`
+}
+
+type fieldError struct {
+	Name  string `json:"name"`
+	Error string `json:"error"`
+}
+
+type responseValidationFailed struct {
+	Message string       `json:"message"`
+	Field   []fieldError `json:"field"`
+}
+
 func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// to do
 	// validate hash salt?
-	// validate username/password empty?
-	// response 400, 401, 422
+	// validate username password (min 8 char, etc)?
+	// response 401?
 
 	var field LoginField
 	json.NewDecoder(r.Body).Decode(&field)
 
-	userRepository := repository.NewUserRepository(AH.DB)
-
-	user := userRepository.SelectByUsername(field.Username)
-
-	if user.Password == field.Password {
-		token, expiresAt := createJWT(user.Id)
-
-		res := responseOK{
-			Token:      token,
-			Scheme:     "Bearer",
-			Expires_at: expiresAt,
+	// field empty (validation error)
+	if field.Username == "" || field.Password == "" {
+		res := responseValidationFailed{
+			Message: "Field(s) is(are) missing",
 		}
 
-		helper.ResponseOK(w, res)
+		var emptyFields []fieldError
+
+		if field.Username == "" {
+			toAdd := fieldError{
+				Name:  "username",
+				Error: "username is missing",
+			}
+
+			emptyFields = append(emptyFields, toAdd)
+		}
+
+		if field.Password == "" {
+			toAdd := fieldError{
+				Name:  "password",
+				Error: "password is missing",
+			}
+
+			emptyFields = append(emptyFields, toAdd)
+		}
+
+		res.Field = emptyFields
+
+		helper.ResponseError(w, http.StatusUnprocessableEntity, res)
+
+	} else {
+		userRepository := repository.NewUserRepository(AH.DB)
+
+		user := userRepository.SelectByUsername(field.Username)
+
+		// ok
+		if user.Password == field.Password {
+			token, expiresAt := helper.CreateJWT(user.Id)
+
+			res := responseOK{
+				Token:      token,
+				Scheme:     "Bearer",
+				Expires_at: expiresAt,
+			}
+
+			helper.ResponseOK(w, res)
+
+			// wrong password (bad request)
+		} else {
+			res := responseBadRequest{
+				Message: "Wrong Password",
+			}
+
+			helper.ResponseError(w, http.StatusBadRequest, res)
+		}
 	}
-}
-
-func createJWT(id string) (string, string) {
-	expiresAt := time.Now().UTC().Add(time.Hour * 2) // 2 hours
-	jwtExp := expiresAt.Unix()
-
-	expiresAtString := expiresAt.Format(time.RFC3339)
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": id,
-		"exp":     jwtExp,
-	})
-
-	tokenString, _ := token.SignedString([]byte("SECRET")) // sementara hardcoded
-
-	return tokenString, expiresAtString
 }
