@@ -6,8 +6,8 @@ CREATE TABLE news(
   nsfw boolean not null,
   content text not null,
   created_at varchar(255) not null,
-  author_id varchar(255),
-  category_id bigint
+  author_id varchar(255) not null,
+  category_id bigint not null
 );
 
 ALTER TABLE news ADD FOREIGN KEY (author_id) REFERENCES users(id);
