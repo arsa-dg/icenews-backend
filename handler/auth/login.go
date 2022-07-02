@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"icenews/backend/helper"
+	"icenews/backend/interfaces"
 	"icenews/backend/repository"
 	"net/http"
 )
@@ -10,26 +11,6 @@ import (
 type LoginField struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type responseOK struct {
-	Token      string `json:"token"`
-	Scheme     string `json:"scheme"`
-	Expires_at string `json:"expires_at"`
-}
-
-type responseBadRequest struct {
-	Message string `json:"message"`
-}
-
-type fieldError struct {
-	Name  string `json:"name"`
-	Error string `json:"error"`
-}
-
-type responseValidationFailed struct {
-	Message string       `json:"message"`
-	Field   []fieldError `json:"field"`
 }
 
 func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -43,14 +24,14 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// field empty (validation error)
 	if field.Username == "" || field.Password == "" {
-		res := responseValidationFailed{
+		res := interfaces.ResponseValidationFailed{
 			Message: "Field(s) is(are) missing",
 		}
 
-		var emptyFields []fieldError
+		var emptyFields []interfaces.FieldError
 
 		if field.Username == "" {
-			toAdd := fieldError{
+			toAdd := interfaces.FieldError{
 				Name:  "username",
 				Error: "username is missing",
 			}
@@ -59,7 +40,7 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if field.Password == "" {
-			toAdd := fieldError{
+			toAdd := interfaces.FieldError{
 				Name:  "password",
 				Error: "password is missing",
 			}
@@ -80,7 +61,7 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if user.Password == field.Password {
 			token, expiresAt := helper.CreateJWT(user.Id)
 
-			res := responseOK{
+			res := interfaces.ResponseOK{
 				Token:      token,
 				Scheme:     "Bearer",
 				Expires_at: expiresAt,
@@ -90,7 +71,7 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 			// wrong password (bad request)
 		} else {
-			res := responseBadRequest{
+			res := interfaces.ResponseBadRequest{
 				Message: "Wrong Password",
 			}
 
