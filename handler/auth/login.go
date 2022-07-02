@@ -8,9 +8,15 @@ import (
 	"net/http"
 )
 
-type LoginField struct {
+type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type AuthResponseOK struct {
+	Token      string `json:"token"`
+	Scheme     string `json:"scheme"`
+	Expires_at string `json:"expires_at"`
 }
 
 func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +25,7 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	// validate username password (min 8 char, etc)?
 	// response 401?
 
-	var field LoginField
+	var field LoginRequest
 	json.NewDecoder(r.Body).Decode(&field)
 
 	// field empty (validation error)
@@ -61,7 +67,7 @@ func (AH AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if user.Password == field.Password {
 			token, expiresAt := helper.CreateJWT(user.Id)
 
-			res := interfaces.ResponseOK{
+			res := AuthResponseOK{
 				Token:      token,
 				Scheme:     "Bearer",
 				Expires_at: expiresAt,
