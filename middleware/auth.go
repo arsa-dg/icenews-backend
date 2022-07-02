@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"icenews/backend/helper"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 
@@ -19,6 +20,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var userId string
 		isGetToken := false
+		secretKey := os.Getenv("SECRET_KEY")
 
 		auth := r.Header.Get("Authorization")
 
@@ -41,7 +43,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 					return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 				}
 
-				return []byte("SECRET"), nil
+				return []byte(secretKey), nil
 			})
 
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && (token.Valid || isGetToken) {

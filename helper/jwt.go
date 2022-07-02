@@ -1,12 +1,15 @@
 package helper
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
 func CreateJWT(id string) (string, string) {
+	secretKey := os.Getenv("SECRET_KEY")
+
 	expiresAt := time.Now().UTC().Add(time.Hour * 2) // 2 hours
 	jwtExp := expiresAt.Unix()
 
@@ -17,7 +20,7 @@ func CreateJWT(id string) (string, string) {
 		"exp":     jwtExp,
 	})
 
-	tokenString, _ := token.SignedString([]byte("SECRET")) // sementara hardcoded
+	tokenString, _ := token.SignedString([]byte(secretKey)) // sementara hardcoded
 
 	return tokenString, expiresAtString
 }
