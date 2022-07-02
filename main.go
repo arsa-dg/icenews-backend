@@ -2,22 +2,19 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"icenews/backend/config"
 	"icenews/backend/routes"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v4"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// hardcoded dburl sementara
-	DBUrl := "postgres://postgres:password@localhost:5432/icenews"
+	_ = godotenv.Load(".env")
 
-	DB, err := pgx.Connect(context.Background(), DBUrl)
-	if err != nil {
-		fmt.Println("Error while connecting to database!")
-	}
+	DB := config.ConnectDB()
+
 	defer DB.Close(context.Background())
 
 	router := chi.NewRouter()
