@@ -17,7 +17,6 @@ func ConnectDB() *pgx.Conn {
 	DBName := os.Getenv("DB_NAME")
 
 	DBUrl := DBDriver + "://" + DBUser + ":" + DBPassword + "@" + DBHost + ":" + DBPort + "/" + DBName
-	fmt.Println(DBUrl)
 
 	DB, err := pgx.Connect(context.Background(), DBUrl)
 	if err != nil {
