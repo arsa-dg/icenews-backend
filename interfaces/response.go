@@ -1,5 +1,11 @@
 package interfaces
 
+type AuthResponseOK struct {
+	Token      string `json:"token"`
+	Scheme     string `json:"scheme"`
+	Expires_at string `json:"expires_at"`
+}
+
 type ResponseBadRequest struct {
 	Message string `json:"message"`
 }

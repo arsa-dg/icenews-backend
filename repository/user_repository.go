@@ -2,19 +2,10 @@ package repository
 
 import (
 	"context"
+	"icenews/backend/interfaces"
 
 	"github.com/jackc/pgx/v4"
 )
-
-type User struct {
-	Id       string
-	Username string
-	Password string
-	Name     string
-	Bio      string
-	Web      string
-	Picture  string
-}
 
 type UserRepository struct {
 	DB *pgx.Conn
@@ -24,8 +15,8 @@ func NewUserRepository(DB *pgx.Conn) UserRepository {
 	return UserRepository{DB}
 }
 
-func (Repository UserRepository) SelectByUsername(username string) User {
-	user := User{}
+func (Repository UserRepository) SelectByUsername(username string) interfaces.User {
+	user := interfaces.User{}
 
 	Repository.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
 		&user.Id,

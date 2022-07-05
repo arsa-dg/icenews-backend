@@ -2,6 +2,7 @@ package auth
 
 import (
 	"icenews/backend/helper"
+	"icenews/backend/interfaces"
 	"net/http"
 )
 
@@ -10,7 +11,7 @@ func (AH AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 
 	token, expiresAt := helper.CreateJWT(userId)
 
-	res := AuthResponseOK{
+	res := interfaces.AuthResponseOK{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,
