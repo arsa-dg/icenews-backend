@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -18,6 +19,7 @@ func NewUserService(DB *pgx.Conn) UserService {
 }
 
 func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
+	// field empty (validation error 422)
 	if helper.IsEmptyStrings(request.Username, request.Password) {
 		res := interfaces.ResponseValidationFailed{
 			Message: "Field(s) is(are) missing",
@@ -48,11 +50,18 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		return res, http.StatusUnprocessableEntity
 	} else {
 		userRepository := repository.NewUserRepository(Service.DB)
-
 		user := userRepository.SelectByUsername(request.Username)
 
-		// ok
-		if helper.IsEqualString(user.Password, request.Password) {
+		isPassErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+
+		// wrong password (bad request 400)
+		if isPassErr == bcrypt.ErrMismatchedHashAndPassword {
+			res := interfaces.ResponseBadRequest{
+				Message: "Wrong Password",
+			}
+
+			return res, http.StatusBadRequest
+		} else { // ok
 			token, expiresAt := helper.CreateJWT(user.Id)
 
 			res := interfaces.AuthResponseOK{
@@ -62,14 +71,6 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 			}
 
 			return res, http.StatusOK
-
-			// wrong password (bad request)
-		} else {
-			res := interfaces.ResponseBadRequest{
-				Message: "Wrong Password",
-			}
-
-			return res, http.StatusBadRequest
 		}
 	}
 }
