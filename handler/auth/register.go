@@ -10,7 +10,17 @@ import (
 
 func (Handler AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var field interfaces.RegisterRequest
-	json.NewDecoder(r.Body).Decode(&field)
+	err := json.NewDecoder(r.Body).Decode(&field)
+
+	if err != nil {
+		res := interfaces.ResponseBadRequest{
+			Message: "Wrong Request Format",
+		}
+
+		helper.ResponseError(w, http.StatusBadRequest, res)
+
+		return
+	}
 
 	userService := service.NewUserService(Handler.DB)
 

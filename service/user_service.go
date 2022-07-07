@@ -55,11 +55,11 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 
 	// bad request (400)
 	if errGenerate != nil {
-		res := interfaces.ResponseBadRequest{
+		res := interfaces.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
-		return res, http.StatusBadRequest
+		return res, http.StatusInternalServerError
 	}
 
 	// OK (200)
@@ -93,21 +93,21 @@ func (Service UserService) RegisterLogic(request interfaces.RegisterRequest) (in
 	hashPass, errGenerate := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 
 	if errGenerate != nil {
-		res := interfaces.ResponseBadRequest{
+		res := interfaces.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
-		return res, http.StatusBadRequest
+		return res, http.StatusInternalServerError
 	}
 
 	errInsert := userRepository.Insert(request.Username, string(hashPass), request.Name, request.Bio, request.Web, request.Picture)
 
 	if errInsert != nil {
-		res := interfaces.ResponseBadRequest{
+		res := interfaces.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
-		return res, http.StatusBadRequest
+		return res, http.StatusInternalServerError
 	}
 
 	res := interfaces.ResponseOK{

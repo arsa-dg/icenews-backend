@@ -27,3 +27,7 @@ type ResponseValidationFailed struct {
 	Message string       `json:"message"`
 	Field   []FieldError `json:"field"`
 }
+
+type ResponseInternalServerError struct {
+	Message string `json:"message"`
+}
