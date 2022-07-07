@@ -6,7 +6,7 @@ CREATE TABLE news(
   nsfw boolean not null,
   content text not null,
   created_at varchar(255) not null,
-  author_id varchar(255) not null,
+  author_id uuid not null,
   category_id bigint not null
 );
 
