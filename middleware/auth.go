@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"icenews/backend/helper"
+	"icenews/backend/interfaces"
 	"net/http"
 	"os"
 	"path"
@@ -11,10 +12,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 )
-
-type responseUnauthorized struct {
-	Message string `json:"message"`
-}
 
 func MiddlewareAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +26,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 		}
 
 		if auth == "" {
-			res := responseUnauthorized{
+			res := interfaces.ResponseUnauthorized{
 				Message: "Authorization is missing",
 			}
 
@@ -52,7 +49,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 				ctx := context.WithValue(r.Context(), "user_id", userId)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
-				res := responseUnauthorized{
+				res := interfaces.ResponseUnauthorized{
 					Message: err.Error(),
 				}
 

@@ -15,10 +15,10 @@ func NewUserRepository(DB *pgx.Conn) UserRepository {
 	return UserRepository{DB}
 }
 
-func (Repository UserRepository) SelectByUsername(username string) interfaces.User {
+func (Repository UserRepository) SelectByUsername(username string) (interfaces.User, error) {
 	user := interfaces.User{}
 
-	Repository.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
+	err := Repository.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
 		&user.Id,
 		&user.Username,
 		&user.Password,
@@ -28,5 +28,5 @@ func (Repository UserRepository) SelectByUsername(username string) interfaces.Us
 		&user.Picture,
 	)
 
-	return user
+	return user, err
 }

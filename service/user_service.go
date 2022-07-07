@@ -48,29 +48,38 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		res.Field = emptyFields
 
 		return res, http.StatusUnprocessableEntity
-	} else {
-		userRepository := repository.NewUserRepository(Service.DB)
-		user := userRepository.SelectByUsername(request.Username)
-
-		isPassErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
-
-		// wrong password (bad request 400)
-		if isPassErr == bcrypt.ErrMismatchedHashAndPassword {
-			res := interfaces.ResponseBadRequest{
-				Message: "Wrong Password",
-			}
-
-			return res, http.StatusBadRequest
-		} else { // ok
-			token, expiresAt := helper.CreateJWT(user.Id)
-
-			res := interfaces.AuthResponseOK{
-				Token:      token,
-				Scheme:     "Bearer",
-				Expires_at: expiresAt,
-			}
-
-			return res, http.StatusOK
-		}
 	}
+
+	userRepository := repository.NewUserRepository(Service.DB)
+	user, err := userRepository.SelectByUsername(request.Username)
+
+	// user not found (invalid credentials 401)
+	if err == pgx.ErrNoRows {
+		res := interfaces.ResponseUnauthorized{
+			Message: "User Not Found",
+		}
+
+		return res, http.StatusUnauthorized
+	}
+
+	isPassErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+
+	// wrong password (invalid credentials 401)
+	if isPassErr == bcrypt.ErrMismatchedHashAndPassword {
+		res := interfaces.ResponseUnauthorized{
+			Message: "Wrong Password",
+		}
+
+		return res, http.StatusUnauthorized
+	}
+
+	token, expiresAt := helper.CreateJWT(user.Id)
+
+	res := interfaces.AuthResponseOK{
+		Token:      token,
+		Scheme:     "Bearer",
+		Expires_at: expiresAt,
+	}
+
+	return res, http.StatusOK
 }

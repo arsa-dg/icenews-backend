@@ -9,11 +9,6 @@ import (
 )
 
 func (Handler AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	// to do
-	// validate hash salt?
-	// validate username password (min 8 char, etc)?
-	// response 401?
-
 	var field interfaces.LoginRequest
 	json.NewDecoder(r.Body).Decode(&field)
 

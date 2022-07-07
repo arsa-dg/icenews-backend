@@ -2,12 +2,12 @@ package helper
 
 func IsEmptyStrings(s ...string) bool {
 	for _, str := range s {
-		if str != "" {
-			return false
+		if str == "" {
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
 func IsEqualString(s1 string, s2 string) bool {
