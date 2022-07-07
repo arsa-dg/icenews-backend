@@ -4,6 +4,7 @@ import (
 	"context"
 	"icenews/backend/interfaces"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -29,4 +30,19 @@ func (Repository UserRepository) SelectByUsername(username string) (interfaces.U
 	)
 
 	return user, err
+}
+
+func (Repository UserRepository) Insert(username string, password string, name string, bio string, web string, picture string) error {
+	id := uuid.New()
+
+	_, err := Repository.DB.Exec(context.Background(), `INSERT INTO
+		users(
+			id, username, password, name, bio, web, picture
+		) 
+		values(
+			$1, $2, $3, $4, $5, $6, $7
+		)
+	`, id, username, password, name, bio, web, picture)
+
+	return err
 }

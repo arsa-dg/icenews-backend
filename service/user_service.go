@@ -62,10 +62,10 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		return res, http.StatusUnauthorized
 	}
 
-	isPassErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+	errPass := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 
 	// wrong password (invalid credentials 401)
-	if isPassErr == bcrypt.ErrMismatchedHashAndPassword {
+	if errPass == bcrypt.ErrMismatchedHashAndPassword {
 		res := interfaces.ResponseUnauthorized{
 			Message: "Wrong Password",
 		}
@@ -73,12 +73,59 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		return res, http.StatusUnauthorized
 	}
 
-	token, expiresAt := helper.CreateJWT(user.Id)
+	token, expiresAt := helper.CreateJWT(user.Id.String())
 
 	res := interfaces.AuthResponseOK{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,
+	}
+
+	return res, http.StatusOK
+}
+
+func (Service UserService) RegisterLogic(request interfaces.RegisterRequest) (interface{}, int) {
+	if helper.IsEmptyStrings(request.Username, request.Password, request.Name, request.Bio, request.Web, request.Picture) {
+		res := interfaces.ResponseValidationFailed{
+			Message: "Field(s) is(are) missing",
+		}
+
+		return res, http.StatusUnprocessableEntity
+	}
+
+	userRepository := repository.NewUserRepository(Service.DB)
+	_, err := userRepository.SelectByUsername(request.Username)
+
+	if err != pgx.ErrNoRows {
+		res := interfaces.ResponseBadRequest{
+			Message: "Username Is Not Available",
+		}
+
+		return res, http.StatusBadRequest
+	}
+
+	hashPass, errGenerate := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+
+	if errGenerate != nil {
+		res := interfaces.ResponseBadRequest{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusBadRequest
+	}
+
+	errInsert := userRepository.Insert(request.Username, string(hashPass), request.Name, request.Bio, request.Web, request.Picture)
+
+	if errInsert != nil {
+		res := interfaces.ResponseBadRequest{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusBadRequest
+	}
+
+	res := interfaces.ResponseOK{
+		Message: "Register Success",
 	}
 
 	return res, http.StatusOK

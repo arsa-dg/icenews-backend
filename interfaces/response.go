@@ -6,6 +6,10 @@ type AuthResponseOK struct {
 	Expires_at string `json:"expires_at"`
 }
 
+type ResponseOK struct {
+	Message string `json:"message"`
+}
+
 type ResponseBadRequest struct {
 	Message string `json:"message"`
 }

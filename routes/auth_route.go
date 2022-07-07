@@ -14,6 +14,7 @@ func AuthRoute(DB *pgx.Conn) chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/login", authHandler.Login)
+	r.Post("/register", authHandler.Register)
 	r.With(middleware.MiddlewareAuth).Get("/token", authHandler.Token)
 
 	// r.Group(func(r chi.Router) {
