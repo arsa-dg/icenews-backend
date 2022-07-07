@@ -6,55 +6,33 @@ import (
 	"icenews/backend/repository"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
-	DB *pgx.Conn
+	DB        *pgx.Conn
+	Validator *validator.Validate
 }
 
 func NewUserService(DB *pgx.Conn) UserService {
-	return UserService{DB}
+	return UserService{DB, validator.New()}
 }
 
 func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
 	// field empty (validation error 422)
-	if helper.IsEmptyStrings(request.Username, request.Password) {
-		res := interfaces.ResponseValidationFailed{
-			Message: "Field(s) is(are) missing",
-		}
+	errValidateRes, errValidateStatus := helper.RequestValidation(Service.Validator, request)
 
-		var emptyFields []interfaces.FieldError
-
-		if helper.IsEmptyStrings(request.Username) {
-			toAdd := interfaces.FieldError{
-				Name:  "username",
-				Error: "username is missing",
-			}
-
-			emptyFields = append(emptyFields, toAdd)
-		}
-
-		if helper.IsEmptyStrings(request.Password) {
-			toAdd := interfaces.FieldError{
-				Name:  "password",
-				Error: "password is missing",
-			}
-
-			emptyFields = append(emptyFields, toAdd)
-		}
-
-		res.Field = emptyFields
-
-		return res, http.StatusUnprocessableEntity
+	if errValidateRes != nil {
+		return errValidateRes, errValidateStatus
 	}
 
 	userRepository := repository.NewUserRepository(Service.DB)
-	user, err := userRepository.SelectByUsername(request.Username)
+	user, errSelect := userRepository.SelectByUsername(request.Username)
 
 	// user not found (invalid credentials 401)
-	if err == pgx.ErrNoRows {
+	if errSelect == pgx.ErrNoRows {
 		res := interfaces.ResponseUnauthorized{
 			Message: "User Not Found",
 		}
@@ -84,6 +62,7 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		return res, http.StatusBadRequest
 	}
 
+	// OK (200)
 	res := interfaces.AuthResponseOK{
 		Token:      token,
 		Scheme:     "Bearer",
@@ -94,12 +73,10 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 }
 
 func (Service UserService) RegisterLogic(request interfaces.RegisterRequest) (interface{}, int) {
-	if helper.IsEmptyStrings(request.Username, request.Password, request.Name, request.Bio, request.Web, request.Picture) {
-		res := interfaces.ResponseValidationFailed{
-			Message: "Field(s) is(are) missing",
-		}
+	errValidateRes, errValidateStatus := helper.RequestValidation(Service.Validator, request)
 
-		return res, http.StatusUnprocessableEntity
+	if errValidateRes != nil {
+		return errValidateRes, errValidateStatus
 	}
 
 	userRepository := repository.NewUserRepository(Service.DB)

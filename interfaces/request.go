@@ -1,15 +1,15 @@
 package interfaces
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,min=4"`
+	Password string `json:"password" validate:"required,min=4"`
 }
 
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-	Bio      string `json:"bio"`
-	Web      string `json:"web"`
-	Picture  string `json:"picture"`
+	Username string `json:"username" validate:"required,min=4"`
+	Password string `json:"password" validate:"required,min=4"`
+	Name     string `json:"name" validate:"required"`
+	Bio      string `json:"bio" validate:"required"`
+	Web      string `json:"web" validate:"required,uri"`
+	Picture  string `json:"picture" validate:"required,uri"`
 }
