@@ -73,7 +73,16 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 		return res, http.StatusUnauthorized
 	}
 
-	token, expiresAt := helper.CreateJWT(user.Id.String())
+	token, expiresAt, errGenerate := helper.CreateJWT(user.Id.String())
+
+	// bad request (400)
+	if errGenerate != nil {
+		res := interfaces.ResponseBadRequest{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusBadRequest
+	}
 
 	res := interfaces.AuthResponseOK{
 		Token:      token,
