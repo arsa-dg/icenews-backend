@@ -34,11 +34,11 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	response, statusCode := h.UserService.LoginLogic(field)
 
-	if statusCode == http.StatusOK {
-		helper.ResponseOK(w, response)
-	} else {
+	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, response)
 	}
+
+	helper.ResponseOK(w, response)
 }
 
 func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
@@ -80,9 +80,9 @@ func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	response, statusCode := h.UserService.RegisterLogic(field)
 
-	if statusCode == http.StatusOK {
-		helper.ResponseOK(w, response)
-	} else {
+	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, response)
 	}
+
+	helper.ResponseOK(w, response)
 }
