@@ -57,7 +57,7 @@ func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 		helper.ResponseError(w, http.StatusInternalServerError, res)
 	}
 
-	res := interfaces.AuthResponseOK{
+	res := interfaces.AuthLoginResponse{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,

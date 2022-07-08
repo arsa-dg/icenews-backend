@@ -64,7 +64,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 	}
 
 	// OK (200)
-	res := interfaces.AuthResponseOK{
+	res := interfaces.AuthLoginResponse{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,

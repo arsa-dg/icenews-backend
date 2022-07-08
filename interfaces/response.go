@@ -1,6 +1,6 @@
 package interfaces
 
-type AuthResponseOK struct {
+type AuthLoginResponse struct {
 	Token      string `json:"token"`
 	Scheme     string `json:"scheme"`
 	Expires_at string `json:"expires_at"`
