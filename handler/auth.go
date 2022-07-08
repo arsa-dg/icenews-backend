@@ -36,6 +36,7 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, response)
+		return
 	}
 
 	helper.ResponseOK(w, response)
@@ -82,6 +83,7 @@ func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, response)
+		return
 	}
 
 	helper.ResponseOK(w, response)
