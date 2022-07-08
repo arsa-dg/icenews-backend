@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,15 +21,15 @@ func NewUserService(DB *pgx.Conn) UserService {
 	return UserService{DB, validator.New()}
 }
 
-func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
+func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
 	// field empty (validation error 422)
-	errValidateRes, errValidateStatus := helper.RequestValidation(Service.Validator, request)
+	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, request)
 
 	if errValidateRes != nil {
 		return errValidateRes, errValidateStatus
 	}
 
-	userRepository := repository.NewUserRepository(Service.DB)
+	userRepository := repository.NewUserRepository(s.DB)
 	user, errSelect := userRepository.SelectByUsername(request.Username)
 
 	// user not found (invalid credentials 401)
@@ -72,14 +73,14 @@ func (Service UserService) LoginLogic(request interfaces.LoginRequest) (interfac
 	return res, http.StatusOK
 }
 
-func (Service UserService) RegisterLogic(request interfaces.RegisterRequest) (interface{}, int) {
-	errValidateRes, errValidateStatus := helper.RequestValidation(Service.Validator, request)
+func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interface{}, int) {
+	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, request)
 
 	if errValidateRes != nil {
 		return errValidateRes, errValidateStatus
 	}
 
-	userRepository := repository.NewUserRepository(Service.DB)
+	userRepository := repository.NewUserRepository(s.DB)
 	_, err := userRepository.SelectByUsername(request.Username)
 
 	if err != pgx.ErrNoRows {
@@ -100,7 +101,18 @@ func (Service UserService) RegisterLogic(request interfaces.RegisterRequest) (in
 		return res, http.StatusInternalServerError
 	}
 
-	errInsert := userRepository.Insert(request.Username, string(hashPass), request.Name, request.Bio, request.Web, request.Picture)
+	id := uuid.New()
+	newUser := interfaces.User{
+		Id:       id,
+		Username: request.Username,
+		Password: string(hashPass),
+		Name:     request.Name,
+		Bio:      request.Bio,
+		Web:      request.Web,
+		Picture:  request.Picture,
+	}
+
+	errInsert := userRepository.Insert(newUser)
 
 	if errInsert != nil {
 		res := interfaces.ResponseInternalServerError{

@@ -18,7 +18,7 @@ func NewAuthHandler(DB *pgx.Conn) AuthHandler {
 	return AuthHandler{DB}
 }
 
-func (Handler AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var field interfaces.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
@@ -32,7 +32,7 @@ func (Handler AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userService := service.NewUserService(Handler.DB)
+	userService := service.NewUserService(h.DB)
 
 	response, statusCode := userService.LoginLogic(field)
 
@@ -43,18 +43,18 @@ func (Handler AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (AH AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
+func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value("user_id").(string)
 
 	token, expiresAt, err := helper.CreateJWT(userId)
 
 	// bad request (400)
 	if err != nil {
-		res := interfaces.ResponseBadRequest{
+		res := interfaces.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
-		helper.ResponseError(w, http.StatusBadRequest, res)
+		helper.ResponseError(w, http.StatusInternalServerError, res)
 	}
 
 	res := interfaces.AuthResponseOK{
@@ -66,7 +66,7 @@ func (AH AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseOK(w, res)
 }
 
-func (Handler AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var field interfaces.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
@@ -80,7 +80,7 @@ func (Handler AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userService := service.NewUserService(Handler.DB)
+	userService := service.NewUserService(h.DB)
 
 	response, statusCode := userService.RegisterLogic(field)
 
