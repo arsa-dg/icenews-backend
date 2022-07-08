@@ -32,7 +32,7 @@ func (Repository UserRepository) SelectByUsername(username string) (interfaces.U
 	return user, err
 }
 
-func (Repository UserRepository) Insert(username string, password string, name string, bio string, web string, picture string) error {
+func (Repository UserRepository) Insert(username, password, name, bio, web, picture string) error {
 	id := uuid.New()
 
 	_, err := Repository.DB.Exec(context.Background(), `INSERT INTO
