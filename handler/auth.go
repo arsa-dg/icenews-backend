@@ -11,11 +11,11 @@ import (
 )
 
 type AuthHandler struct {
-	DB *pgx.Conn
+	UserService service.UserService
 }
 
 func NewAuthHandler(DB *pgx.Conn) AuthHandler {
-	return AuthHandler{DB}
+	return AuthHandler{service.NewUserService(DB)}
 }
 
 func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +32,7 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userService := service.NewUserService(h.DB)
-
-	response, statusCode := userService.LoginLogic(field)
+	response, statusCode := h.UserService.LoginLogic(field)
 
 	if statusCode == http.StatusOK {
 		helper.ResponseOK(w, response)
@@ -80,9 +78,7 @@ func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userService := service.NewUserService(h.DB)
-
-	response, statusCode := userService.RegisterLogic(field)
+	response, statusCode := h.UserService.RegisterLogic(field)
 
 	if statusCode == http.StatusOK {
 		helper.ResponseOK(w, response)

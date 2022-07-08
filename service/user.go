@@ -13,12 +13,12 @@ import (
 )
 
 type UserService struct {
-	DB        *pgx.Conn
-	Validator *validator.Validate
+	Validator      *validator.Validate
+	UserRepository repository.UserRepository
 }
 
 func NewUserService(DB *pgx.Conn) UserService {
-	return UserService{DB, validator.New()}
+	return UserService{validator.New(), repository.NewUserRepository(DB)}
 }
 
 func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
@@ -29,8 +29,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 		return errValidateRes, errValidateStatus
 	}
 
-	userRepository := repository.NewUserRepository(s.DB)
-	user, errSelect := userRepository.SelectByUsername(request.Username)
+	user, errSelect := s.UserRepository.SelectByUsername(request.Username)
 
 	// user not found (invalid credentials 401)
 	if errSelect == pgx.ErrNoRows {
@@ -80,8 +79,7 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 		return errValidateRes, errValidateStatus
 	}
 
-	userRepository := repository.NewUserRepository(s.DB)
-	_, err := userRepository.SelectByUsername(request.Username)
+	_, err := s.UserRepository.SelectByUsername(request.Username)
 
 	if err != pgx.ErrNoRows {
 		res := interfaces.ResponseBadRequest{
@@ -112,7 +110,7 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 		Picture:  request.Picture,
 	}
 
-	errInsert := userRepository.Insert(newUser)
+	errInsert := s.UserRepository.Insert(newUser)
 
 	if errInsert != nil {
 		res := interfaces.ResponseInternalServerError{
