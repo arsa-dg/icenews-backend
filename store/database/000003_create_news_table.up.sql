@@ -5,9 +5,13 @@ CREATE TABLE news(
   cover_image varchar(255) not null,
   nsfw boolean not null,
   content text not null,
-  created_at varchar(255) not null,
+  upvote int not null default 0,
+  downvote int not null default 0,
+  comment int not null default 0,
+  view int not null default 0,
+  created_at timestamp not null,
   author_id uuid not null,
-  category_id bigint not null
+  category_id integer not null
 );
 
 ALTER TABLE news ADD FOREIGN KEY (author_id) REFERENCES users(id);
