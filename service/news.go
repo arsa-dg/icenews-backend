@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"icenews/backend/interfaces"
 	"icenews/backend/repository"
 	"net/http"
 
@@ -19,14 +19,14 @@ func NewNewsService(DB *pgx.Conn) NewsService {
 }
 
 func (s NewsService) GetAllLogic() (interface{}, int) {
-	newsList, err := s.NewsRepository.SelectAll()
-
-	fmt.Println("service")
+	news, err := s.NewsRepository.SelectAll()
+	res := interfaces.NewsListResponse{
+		Data: news,
+	}
 
 	if err != nil {
-		return nil, 400
+		return nil, http.StatusInternalServerError
 	}
-	fmt.Println(newsList)
 
-	return newsList, http.StatusOK
+	return res, http.StatusOK
 }

@@ -32,7 +32,7 @@ type NewsCounter struct {
 	View     int `json:"view"`
 }
 
-type NewsList struct {
+type News struct {
 	Id               int          `json:"id"`
 	Title            string       `json:"title"`
 	SlugUrl          string       `json:"slug_url"`
@@ -46,7 +46,7 @@ type NewsList struct {
 }
 
 type NewsListResponse struct {
-	Data []NewsList `json:"data"`
+	Data []News `json:"data"`
 }
 
 type ResponseOK struct {

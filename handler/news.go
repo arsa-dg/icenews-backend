@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"icenews/backend/helper"
 	"icenews/backend/service"
 	"net/http"
@@ -19,8 +18,6 @@ func NewNewsHandler(DB *pgx.Conn) NewsHandler {
 
 func (h NewsHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	response, statusCode := h.NewsService.GetAllLogic()
-
-	fmt.Println("handler")
 
 	if statusCode != http.StatusOK {
 		helper.ResponseError(w, http.StatusInternalServerError, nil)
