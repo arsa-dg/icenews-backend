@@ -9,11 +9,11 @@ import (
 )
 
 func NewsRoute(DB *pgx.Conn) chi.Router {
-	authHandler := handler.NewNewsHandler(DB)
+	newsHandler := handler.NewNewsHandler(DB)
 
 	r := chi.NewRouter()
 
-	r.With(middleware.MiddlewareAuth).Get("/", authHandler.GetAll)
+	r.With(middleware.MiddlewareAuth).Get("/", newsHandler.GetAll)
 
 	return r
 }
