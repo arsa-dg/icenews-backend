@@ -100,3 +100,25 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 
 	return res, http.StatusOK
 }
+
+func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
+	res, err := s.NewsRepository.SelectById(id)
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	if res.Id == 0 {
+		res := interfaces.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
+	}
+
+	return res, http.StatusOK
+}
