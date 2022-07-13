@@ -36,24 +36,6 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 
 	news, err := s.NewsRepository.SelectAll(category, scope)
 
-	// category := query.Get("category")
-	// scope := query.Get("scope")
-	// categoryInt := 0
-	// var errCategory error
-
-	// if category != "" {
-	// 	categoryInt, errCategory = strconv.Atoi(category)
-
-	// 	if errCategory != nil {
-	// 		res := interfaces.ResponseBadRequest{
-	// 			Message: "Category Must Be An Integer",
-	// 		}
-
-	// 		return res, http.StatusBadRequest
-	// 	}
-	// }
-
-	// news, err := s.NewsRepository.SelectAll(categoryInt, scope)
 	res := interfaces.NewsListResponse{
 		Data: news,
 	}
