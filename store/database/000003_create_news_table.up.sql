@@ -1,3 +1,5 @@
+CREATE TYPE scope AS ENUM('top_news', 'breaking_news');
+
 CREATE TABLE news(
   id serial primary key,
   title varchar(255) not null,
@@ -9,6 +11,7 @@ CREATE TABLE news(
   downvote int not null default 0,
   comment int not null default 0,
   view int not null default 0,
+  scope scope not null,
   created_at timestamp not null,
   author_id uuid not null,
   category_id integer not null
