@@ -24,6 +24,7 @@ func main() {
 	})
 
 	router.Mount("/auth", routes.AuthRoute(DB))
+	router.Mount("/me", routes.MeRoute(DB))
 
 	http.ListenAndServe(":8080", router)
 }

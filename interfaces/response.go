@@ -6,6 +6,14 @@ type AuthLoginResponse struct {
 	Expires_at string `json:"expires_at"`
 }
 
+type MeProfileResponse struct {
+	Username string `json:"username"`
+	Name     string `json:"name"`
+	Bio      string `json:"bio"`
+	Web      string `json:"web"`
+	Picture  string `json:"picture"`
+}
+
 type ResponseOK struct {
 	Message string `json:"message"`
 }

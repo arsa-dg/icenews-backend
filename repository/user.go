@@ -4,6 +4,7 @@ import (
 	"context"
 	"icenews/backend/interfaces"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -19,6 +20,22 @@ func (r UserRepository) SelectByUsername(username string) (interfaces.User, erro
 	user := interfaces.User{}
 
 	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
+		&user.Id,
+		&user.Username,
+		&user.Password,
+		&user.Name,
+		&user.Bio,
+		&user.Web,
+		&user.Picture,
+	)
+
+	return user, err
+}
+
+func (r UserRepository) SelectById(id uuid.UUID) (interfaces.User, error) {
+	user := interfaces.User{}
+
+	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE id=$1", id).Scan(
 		&user.Id,
 		&user.Username,
 		&user.Password,

@@ -126,3 +126,25 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 
 	return res, http.StatusOK
 }
+
+func (s UserService) ProfileLogic(id uuid.UUID) (interface{}, int) {
+	user, errSelect := s.UserRepository.SelectById(id)
+
+	if errSelect == pgx.ErrNoRows {
+		res := interfaces.ResponseBadRequest{
+			Message: "User Not Found",
+		}
+
+		return res, http.StatusBadRequest
+	}
+
+	res := interfaces.MeProfileResponse{
+		Username: user.Username,
+		Name:     user.Name,
+		Bio:      user.Bio,
+		Web:      user.Web,
+		Picture:  user.Picture,
+	}
+
+	return res, http.StatusOK
+}
