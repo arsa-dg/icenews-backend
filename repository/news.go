@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"icenews/backend/interfaces"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -15,11 +14,7 @@ func NewNewsRepository(DB *pgx.Conn) NewsRepository {
 	return NewsRepository{DB}
 }
 
-func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.News, error) {
-	newsList := []interfaces.News{}
-	var newsImage []string
-	news := interfaces.News{}
-
+func (r NewsRepository) SelectAll(category string, scope string) (pgx.Rows, error) {
 	var rows pgx.Rows
 	var err error
 
@@ -50,51 +45,5 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.N
 		rows, err = r.DB.Query(context.Background(), query)
 	}
 
-	for rows.Next() {
-		tempCategory := interfaces.NewsCategory{}
-		tempAuthor := interfaces.NewsAuthor{}
-		tempCounter := interfaces.NewsCounter{}
-		tempNews := interfaces.News{}
-
-		var newImage string
-		var errScan error
-
-		errScan = rows.Scan(
-			&tempNews.Id, &tempNews.Title, &tempNews.SlugUrl, &tempNews.CoverImage,
-			&newImage, &tempNews.Nsfw, &tempCategory.Id, &tempCategory.Name, &tempAuthor.Id,
-			&tempAuthor.Name, &tempAuthor.Picture, &tempCounter.Upvote, &tempCounter.Downvote, &tempCounter.Comment,
-			&tempCounter.View, &tempNews.CreatedAt,
-		)
-
-		if errScan != nil {
-			return newsList, errScan
-		}
-
-		if news.Id != tempNews.Id {
-			tempNews.Category = tempCategory
-			tempNews.Author = tempAuthor
-			tempNews.Counter = tempCounter
-
-			if news.Id != 0 {
-				news.AdditionalImages = newsImage
-				newsList = append(newsList, news)
-			}
-
-			newsImage = []string{}
-			news = tempNews
-		}
-
-		if newImage != "" {
-			newsImage = append(newsImage, newImage)
-		}
-	}
-
-	if news.Id == 0 {
-		return nil, err
-	}
-
-	news.AdditionalImages = newsImage
-	newsList = append(newsList, news)
-
-	return newsList, err
+	return rows, err
 }
