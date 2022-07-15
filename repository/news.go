@@ -72,13 +72,7 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.N
 	return newsListRaw, err
 }
 
-func (r NewsRepository) SelectById(id string) (interfaces.NewsDetailResponse, error) {
-	newsImage := []string{}
-	category := interfaces.NewsCategory{}
-	author := interfaces.NewsAuthor{}
-	counter := interfaces.NewsCounter{}
-	news := interfaces.NewsDetailResponse{}
-
+func (r NewsRepository) SelectById(id string) (pgx.Rows, error) {
 	rows, err := r.DB.Query(context.Background(), `SELECT
 		news.id, news.title, news.content, news.slug_url, news.cover_image, 
 		COALESCE(news_images.image, ''), news.nsfw, categories.id, categories.name, 
@@ -91,37 +85,5 @@ func (r NewsRepository) SelectById(id string) (interfaces.NewsDetailResponse, er
 		WHERE news.id = $1;
 	`, id)
 
-	count := 0
-	for rows.Next() {
-		var newImage string
-		var errScan error
-
-		if count < 1 {
-			errScan = rows.Scan(
-				&news.Id, &news.Title, &news.Content, &news.SlugUrl, &news.CoverImage,
-				&newImage, &news.Nsfw, &category.Id, &category.Name, &author.Id,
-				&author.Name, &author.Picture, &counter.Upvote, &counter.Downvote, &counter.Comment,
-				&counter.View, &news.CreatedAt,
-			)
-		} else {
-			errScan = rows.Scan(nil, nil, nil, nil, nil, &newImage, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-		}
-
-		if errScan != nil {
-			return news, errScan
-		}
-
-		if newImage != "" {
-			newsImage = append(newsImage, newImage)
-		}
-
-		count++
-	}
-
-	news.AdditionalImages = newsImage
-	news.Category = category
-	news.Author = author
-	news.Counter = counter
-
-	return news, err
+	return rows, err
 }

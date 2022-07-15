@@ -102,7 +102,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 }
 
 func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
-	res, err := s.NewsRepository.SelectById(id)
+	rows, err := s.NewsRepository.SelectById(id)
 
 	if err != nil {
 		res := interfaces.ResponseInternalServerError{
@@ -112,7 +112,49 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 		return res, http.StatusInternalServerError
 	}
 
-	if res.Id == 0 {
+	newsImage := []string{}
+	category := interfaces.NewsCategory{}
+	author := interfaces.NewsAuthor{}
+	counter := interfaces.NewsCounter{}
+	news := interfaces.NewsDetailResponse{}
+
+	count := 0
+	for rows.Next() {
+		var newImage string
+		var errScan error
+
+		if count < 1 {
+			errScan = rows.Scan(
+				&news.Id, &news.Title, &news.Content, &news.SlugUrl, &news.CoverImage,
+				&newImage, &news.Nsfw, &category.Id, &category.Name, &author.Id,
+				&author.Name, &author.Picture, &counter.Upvote, &counter.Downvote, &counter.Comment,
+				&counter.View, &news.CreatedAt,
+			)
+		} else {
+			errScan = rows.Scan(nil, nil, nil, nil, nil, &newImage, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		}
+
+		if errScan != nil {
+			res := interfaces.ResponseBadRequest{
+				Message: "News Not Found",
+			}
+
+			return res, http.StatusNotFound
+		}
+
+		if newImage != "" {
+			newsImage = append(newsImage, newImage)
+		}
+
+		count++
+	}
+
+	news.AdditionalImages = newsImage
+	news.Category = category
+	news.Author = author
+	news.Counter = counter
+
+	if news.Id == 0 {
 		res := interfaces.ResponseBadRequest{
 			Message: "News Not Found",
 		}
@@ -120,5 +162,5 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 		return res, http.StatusNotFound
 	}
 
-	return res, http.StatusOK
+	return news, http.StatusOK
 }
