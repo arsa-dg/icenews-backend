@@ -72,7 +72,9 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.N
 	return newsListRaw, err
 }
 
-func (r NewsRepository) SelectById(id string) (pgx.Rows, error) {
+func (r NewsRepository) SelectById(id string) ([]interfaces.NewsDetailRaw, error) {
+	newsDetailRaw := []interfaces.NewsDetailRaw{}
+
 	rows, err := r.DB.Query(context.Background(), `SELECT
 		news.id, news.title, news.content, news.slug_url, news.cover_image, 
 		COALESCE(news_images.image, ''), news.nsfw, categories.id, categories.name, 
@@ -85,5 +87,27 @@ func (r NewsRepository) SelectById(id string) (pgx.Rows, error) {
 		WHERE news.id = $1;
 	`, id)
 
-	return rows, err
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		news := interfaces.NewsDetailRaw{}
+
+		errScan := rows.Scan(
+			&news.Id, &news.Title, &news.Content, &news.SlugUrl, &news.CoverImage,
+			&news.AdditionalImage, &news.Nsfw, &news.CategoryId,
+			&news.CategoryName, &news.AuthorId, &news.AuthorName,
+			&news.AuthorPicture, &news.Upvote, &news.Downvote,
+			&news.Comment, &news.View, &news.CreatedAt,
+		)
+
+		if errScan != nil {
+			return nil, errScan
+		}
+
+		newsDetailRaw = append(newsDetailRaw, news)
+	}
+
+	return newsDetailRaw, err
 }

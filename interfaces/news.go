@@ -20,3 +20,8 @@ type NewsListRaw struct {
 	View            int
 	CreatedAt       string
 }
+
+type NewsDetailRaw struct {
+	NewsListRaw
+	Content string
+}
