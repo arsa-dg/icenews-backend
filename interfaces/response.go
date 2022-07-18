@@ -14,6 +14,8 @@ type MeProfileResponse struct {
 	Bio      string `json:"bio"`
 	Web      string `json:"web"`
 	Picture  string `json:"picture"`
+}
+
 type NewsCategory struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
