@@ -49,10 +49,6 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	news := interfaces.NewsList{}
 
 	for _, newsRaw := range newsListRaw {
-		if newsRaw.AdditionalImage != "" {
-			newsImage = append(newsImage, newsRaw.AdditionalImage)
-		}
-
 		if newsRaw.Id != news.Id {
 			if news.Id != 0 {
 				news.AdditionalImages = newsImage
@@ -60,6 +56,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 
 				news = interfaces.NewsList{}
 			}
+			newsImage = []string{}
 
 			news.Id = newsRaw.Id
 			news.Title = newsRaw.Title
@@ -79,6 +76,10 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 			news.Counter.Downvote = newsRaw.Downvote
 			news.Counter.Comment = newsRaw.Comment
 			news.Counter.View = newsRaw.View
+		}
+
+		if newsRaw.AdditionalImage != "" {
+			newsImage = append(newsImage, newsRaw.AdditionalImage)
 		}
 	}
 
