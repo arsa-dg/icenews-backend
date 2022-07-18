@@ -34,11 +34,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 		return res, http.StatusBadRequest
 	}
 
-	newsList := []interfaces.News{}
-	var newsImage []string
-	news := interfaces.News{}
-
-	rows, err := s.NewsRepository.SelectAll(category, scope)
+	newsListRaw, err := s.NewsRepository.SelectAll(category, scope)
 
 	if err != nil {
 		res := interfaces.ResponseInternalServerError{
@@ -48,46 +44,41 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 		return res, http.StatusInternalServerError
 	}
 
-	for rows.Next() {
-		tempCategory := interfaces.NewsCategory{}
-		tempAuthor := interfaces.NewsAuthor{}
-		tempCounter := interfaces.NewsCounter{}
-		tempNews := interfaces.News{}
+	newsList := []interfaces.NewsList{}
+	var newsImage []string
+	news := interfaces.NewsList{}
 
-		var newImage string
-		var errScan error
-
-		errScan = rows.Scan(
-			&tempNews.Id, &tempNews.Title, &tempNews.SlugUrl, &tempNews.CoverImage,
-			&newImage, &tempNews.Nsfw, &tempCategory.Id, &tempCategory.Name, &tempAuthor.Id,
-			&tempAuthor.Name, &tempAuthor.Picture, &tempCounter.Upvote, &tempCounter.Downvote, &tempCounter.Comment,
-			&tempCounter.View, &tempNews.CreatedAt,
-		)
-
-		if errScan != nil {
-			res := interfaces.NewsListResponse{
-				Data: nil,
-			}
-
-			return res, http.StatusOK
+	for _, newsRaw := range newsListRaw {
+		if newsRaw.AdditionalImage != "" {
+			newsImage = append(newsImage, newsRaw.AdditionalImage)
 		}
 
-		if news.Id != tempNews.Id {
-			tempNews.Category = tempCategory
-			tempNews.Author = tempAuthor
-			tempNews.Counter = tempCounter
-
+		if newsRaw.Id != news.Id {
 			if news.Id != 0 {
 				news.AdditionalImages = newsImage
 				newsList = append(newsList, news)
+
+				news = interfaces.NewsList{}
 			}
 
-			newsImage = []string{}
-			news = tempNews
-		}
+			news.Id = newsRaw.Id
+			news.Title = newsRaw.Title
+			news.SlugUrl = newsRaw.SlugUrl
+			news.CoverImage = newsRaw.CoverImage
+			news.Nsfw = newsRaw.Nsfw
+			news.CreatedAt = newsRaw.CreatedAt
 
-		if newImage != "" {
-			newsImage = append(newsImage, newImage)
+			news.Category.Id = newsRaw.CategoryId
+			news.Category.Name = newsRaw.CategoryName
+
+			news.Author.Id = newsRaw.AuthorId
+			news.Author.Name = newsRaw.AuthorName
+			news.Author.Picture = newsRaw.AuthorPicture
+
+			news.Counter.Upvote = newsRaw.Upvote
+			news.Counter.Downvote = newsRaw.Downvote
+			news.Counter.Comment = newsRaw.Comment
+			news.Counter.View = newsRaw.View
 		}
 	}
 

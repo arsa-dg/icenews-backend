@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"icenews/backend/interfaces"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -14,9 +15,10 @@ func NewNewsRepository(DB *pgx.Conn) NewsRepository {
 	return NewsRepository{DB}
 }
 
-func (r NewsRepository) SelectAll(category string, scope string) (pgx.Rows, error) {
+func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.NewsListRaw, error) {
 	var rows pgx.Rows
 	var err error
+	var newsListRaw []interfaces.NewsListRaw
 
 	query := `SELECT
 		news.id, news.title, news.slug_url, news.cover_image, COALESCE(news_images.image, ''),
@@ -45,5 +47,27 @@ func (r NewsRepository) SelectAll(category string, scope string) (pgx.Rows, erro
 		rows, err = r.DB.Query(context.Background(), query)
 	}
 
-	return rows, err
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		news := interfaces.NewsListRaw{}
+
+		errScan := rows.Scan(
+			&news.Id, &news.Title, &news.SlugUrl, &news.CoverImage,
+			&news.AdditionalImage, &news.Nsfw, &news.CategoryId,
+			&news.CategoryName, &news.AuthorId, &news.AuthorName,
+			&news.AuthorPicture, &news.Upvote, &news.Downvote,
+			&news.Comment, &news.View, &news.CreatedAt,
+		)
+
+		if errScan != nil {
+			return nil, errScan
+		}
+
+		newsListRaw = append(newsListRaw, news)
+	}
+
+	return newsListRaw, err
 }
