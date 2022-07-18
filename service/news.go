@@ -155,3 +155,21 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 
 	return news, http.StatusOK
 }
+
+func (s NewsService) NewsCategoryLogic() (interface{}, int) {
+	newsCategory, err := s.NewsRepository.SelectAllCategory()
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	res := interfaces.NewsCategoryResponse{
+		Data: newsCategory,
+	}
+
+	return res, http.StatusOK
+}

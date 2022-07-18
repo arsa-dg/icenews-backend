@@ -13,8 +13,11 @@ func NewsRoute(DB *pgx.Conn) chi.Router {
 
 	r := chi.NewRouter()
 
-	r.With(middleware.MiddlewareAuth).Get("/", newsHandler.GetAll)
-	r.With(middleware.MiddlewareAuth).Get("/{id:^[0-9]+}", newsHandler.GetDetail)
+	r.Use(middleware.MiddlewareAuth)
+
+	r.Get("/", newsHandler.GetAll)
+	r.Get("/{id:^[0-9]+}", newsHandler.GetDetail)
+	r.Get("/category", newsHandler.NewsCategory)
 
 	return r
 }
