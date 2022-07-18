@@ -54,6 +54,8 @@ func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 		}
 
 		helper.ResponseError(w, http.StatusInternalServerError, res)
+
+		return
 	}
 
 	res := interfaces.AuthLoginResponse{
