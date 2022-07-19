@@ -28,12 +28,16 @@ func (h MeHandler) Profile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		helper.ResponseError(w, http.StatusInternalServerError, res)
+
+		return
 	}
 
 	res, statusCode := h.UserService.ProfileLogic(userIdUUID)
 
 	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, res)
+
+		return
 	}
 
 	helper.ResponseOK(w, res)
