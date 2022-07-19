@@ -65,6 +65,10 @@ type NewsListResponse struct {
 	Data []NewsList `json:"data"`
 }
 
+type NewsCategoryResponse struct {
+	Data []NewsCategory `json:"data"`
+}
+
 type ResponseOK struct {
 	Message string `json:"message"`
 }

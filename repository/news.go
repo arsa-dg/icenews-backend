@@ -111,3 +111,27 @@ func (r NewsRepository) SelectById(id string) ([]interfaces.NewsDetailRaw, error
 
 	return newsDetailRaw, err
 }
+
+func (r NewsRepository) SelectAllCategory() ([]interfaces.NewsCategory, error) {
+	rows, err := r.DB.Query(context.Background(), "SELECT * FROM categories;")
+
+	if err != nil {
+		return nil, err
+	}
+
+	categoryList := []interfaces.NewsCategory{}
+
+	for rows.Next() {
+		category := interfaces.NewsCategory{}
+
+		errScan := rows.Scan(&category.Id, &category.Name)
+
+		if errScan != nil {
+			return nil, errScan
+		}
+
+		categoryList = append(categoryList, category)
+	}
+
+	return categoryList, nil
+}

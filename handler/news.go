@@ -42,3 +42,15 @@ func (h NewsHandler) GetDetail(w http.ResponseWriter, r *http.Request) {
 
 	helper.ResponseOK(w, response)
 }
+
+func (h NewsHandler) NewsCategory(w http.ResponseWriter, r *http.Request) {
+	response, statusCode := h.NewsService.NewsCategoryLogic()
+
+	if statusCode != http.StatusOK {
+		helper.ResponseError(w, statusCode, response)
+
+		return
+	}
+
+	helper.ResponseOK(w, response)
+}
