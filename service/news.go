@@ -100,3 +100,58 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 
 	return res, http.StatusOK
 }
+
+func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
+	newsDetailRaw, err := s.NewsRepository.SelectById(id)
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	var newsImage []string
+	news := interfaces.NewsDetailResponse{}
+
+	for idx, newsRaw := range newsDetailRaw {
+		if newsRaw.AdditionalImage != "" {
+			newsImage = append(newsImage, newsRaw.AdditionalImage)
+		}
+
+		if idx == 0 {
+			news.Id = newsRaw.Id
+			news.Title = newsRaw.Title
+			news.Content = newsRaw.Content
+			news.SlugUrl = newsRaw.SlugUrl
+			news.CoverImage = newsRaw.CoverImage
+			news.Nsfw = newsRaw.Nsfw
+			news.CreatedAt = newsRaw.CreatedAt
+
+			news.Category.Id = newsRaw.CategoryId
+			news.Category.Name = newsRaw.CategoryName
+
+			news.Author.Id = newsRaw.AuthorId
+			news.Author.Name = newsRaw.AuthorName
+			news.Author.Picture = newsRaw.AuthorPicture
+
+			news.Counter.Upvote = newsRaw.Upvote
+			news.Counter.Downvote = newsRaw.Downvote
+			news.Counter.Comment = newsRaw.Comment
+			news.Counter.View = newsRaw.View
+		}
+	}
+
+	if news.Id == 0 {
+		res := interfaces.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
+	}
+
+	news.AdditionalImages = newsImage
+
+	return news, http.StatusOK
+}

@@ -47,6 +47,20 @@ type NewsList struct {
 	CreatedAt        string       `json:"created_at"`
 }
 
+type NewsDetailResponse struct {
+	Id               int          `json:"id"`
+	Title            string       `json:"title"`
+	Content          string       `json:"content"`
+	SlugUrl          string       `json:"slug_url"`
+	CoverImage       string       `json:"cover_image"`
+	AdditionalImages []string     `json:"additional_images"`
+	Nsfw             bool         `json:"nsfw"`
+	Category         NewsCategory `json:"category"`
+	Author           NewsAuthor   `json:"author"`
+	Counter          NewsCounter  `json:"counter"`
+	CreatedAt        string       `json:"created_at"`
+}
+
 type NewsListResponse struct {
 	Data []NewsList `json:"data"`
 }
