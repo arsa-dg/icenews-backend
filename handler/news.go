@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"encoding/json"
 	"icenews/backend/helper"
+	"icenews/backend/interfaces"
 	"icenews/backend/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -45,6 +48,45 @@ func (h NewsHandler) GetDetail(w http.ResponseWriter, r *http.Request) {
 
 func (h NewsHandler) NewsCategory(w http.ResponseWriter, r *http.Request) {
 	response, statusCode := h.NewsService.NewsCategoryLogic()
+
+	if statusCode != http.StatusOK {
+		helper.ResponseError(w, statusCode, response)
+
+		return
+	}
+
+	helper.ResponseOK(w, response)
+}
+
+func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
+	newsId := chi.URLParam(r, "id")
+	var field interfaces.CommentRequest
+	err := json.NewDecoder(r.Body).Decode(&field)
+	userId := r.Context().Value("user_id").(string)
+
+	if err != nil {
+		res := interfaces.ResponseBadRequest{
+			Message: "Wrong Request Format",
+		}
+
+		helper.ResponseError(w, http.StatusBadRequest, res)
+
+		return
+	}
+
+	userIdUUID, err := uuid.Parse(userId)
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		helper.ResponseError(w, http.StatusInternalServerError, res)
+
+		return
+	}
+
+	response, statusCode := h.NewsService.AddCommentLogic(field, newsId, userIdUUID)
 
 	if statusCode != http.StatusOK {
 		helper.ResponseError(w, statusCode, response)

@@ -12,7 +12,7 @@ CREATE TABLE news(
   comment int not null default 0,
   view int not null default 0,
   scope scope not null,
-  created_at timestamp not null,
+  created_at timestamp not null default CURRENT_TIMESTAMP,
   author_id uuid not null,
   category_id integer not null
 );

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"icenews/backend/helper"
 	"icenews/backend/interfaces"
 	"icenews/backend/repository"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -169,6 +171,30 @@ func (s NewsService) NewsCategoryLogic() (interface{}, int) {
 
 	res := interfaces.NewsCategoryResponse{
 		Data: newsCategory,
+	}
+
+	return res, http.StatusOK
+}
+
+func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int) {
+	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, requestBody)
+
+	if errValidateRes != nil {
+		return errValidateRes, errValidateStatus
+	}
+
+	commentId, err := s.NewsRepository.InsertComment(requestBody.Description, newsId, authorId)
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	res := interfaces.CommentAddResponse{
+		Id: commentId,
 	}
 
 	return res, http.StatusOK

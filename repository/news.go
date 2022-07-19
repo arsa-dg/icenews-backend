@@ -4,6 +4,7 @@ import (
 	"context"
 	"icenews/backend/interfaces"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -134,4 +135,17 @@ func (r NewsRepository) SelectAllCategory() ([]interfaces.NewsCategory, error) {
 	}
 
 	return categoryList, nil
+}
+
+func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.UUID) (int, error) {
+	var commentId int
+
+	err := r.DB.QueryRow(context.Background(), "INSERT INTO comments(description, author_id, news_id) values($1, $2, $3) RETURNING id;",
+		description, authorId, newsId).Scan(&commentId)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return commentId, err
 }

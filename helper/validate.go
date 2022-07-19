@@ -13,6 +13,8 @@ func ErrMsg(tag string) string {
 		return "This field is required"
 	case "min":
 		return "This field needs more character"
+	case "max":
+		return "This field needs less character"
 	case "uri":
 		return "This field must in URI format"
 	default:
