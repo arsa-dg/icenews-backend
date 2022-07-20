@@ -149,3 +149,37 @@ func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.
 
 	return commentId, err
 }
+
+func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]interfaces.Comment, error) {
+	rows, err := r.DB.Query(context.Background(), `SELECT
+		comments.id, comments.description, users.id, users.name, users.picture, 
+		TO_CHAR(comments.created_at, 'YYYY-MM-DD"T"HH:MI:SS"Z')
+		FROM comments 
+		INNER JOIN users ON comments.author_id = users.id
+		WHERE comments.news_id = $1;
+	`, newsId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	commentList := []interfaces.Comment{}
+
+	for rows.Next() {
+		comment := interfaces.Comment{}
+
+		errScan := rows.Scan(
+			&comment.Id, &comment.Description, &comment.Commentator.Id,
+			&comment.Commentator.Name, &comment.Commentator.Picture,
+			&comment.CreatedAt,
+		)
+
+		if errScan != nil {
+			return nil, errScan
+		}
+
+		commentList = append(commentList, comment)
+	}
+
+	return commentList, nil
+}
