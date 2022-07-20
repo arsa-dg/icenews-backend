@@ -41,7 +41,7 @@ type CommentAddResponse struct {
 }
 
 type CommentListResponse struct {
-	Data []Comment
+	Data []Comment `json:"data"`
 }
 
 type ResponseOK struct {
