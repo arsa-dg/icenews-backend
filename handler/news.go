@@ -62,7 +62,6 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	newsId := chi.URLParam(r, "id")
 	var field interfaces.CommentRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
-	userId := r.Context().Value("user_id").(string)
 
 	if err != nil {
 		res := interfaces.ResponseBadRequest{
@@ -74,6 +73,7 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId := r.Context().Value("user_id").(string)
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
