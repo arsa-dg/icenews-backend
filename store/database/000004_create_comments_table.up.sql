@@ -6,6 +6,6 @@ CREATE TABLE comments(
   news_id integer not null
 );
 
-ALTER TABLE comments ADD FOREIGN KEY (author_id) REFERENCES users(id);
+ALTER TABLE comments ADD FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE;
 
-ALTER TABLE comments ADD FOREIGN KEY (news_id) REFERENCES news(id);
+ALTER TABLE comments ADD FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE;
