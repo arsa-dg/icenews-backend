@@ -6,6 +6,7 @@ import (
 	"icenews/backend/repository"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -46,6 +47,18 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 		return res, http.StatusInternalServerError
 	}
 
+	if len(newsListRaw) == 0 {
+		res := interfaces.NewsListResponse{
+			Data: nil,
+		}
+
+		return res, http.StatusOK
+	}
+
+	sort.Slice(newsListRaw, func(i, j int) bool {
+		return newsListRaw[i].Id < newsListRaw[j].Id
+	})
+
 	newsList := []interfaces.NewsList{}
 	var newsImage []string
 	news := interfaces.NewsList{}
@@ -85,14 +98,6 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 		}
 	}
 
-	if news.Id == 0 {
-		res := interfaces.NewsListResponse{
-			Data: nil,
-		}
-
-		return res, http.StatusOK
-	}
-
 	news.AdditionalImages = newsImage
 	newsList = append(newsList, news)
 
@@ -112,6 +117,14 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 		}
 
 		return res, http.StatusInternalServerError
+	}
+
+	if len(newsDetailRaw) == 0 {
+		res := interfaces.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
 	}
 
 	var newsImage []string
@@ -145,14 +158,6 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 		}
 	}
 
-	if news.Id == 0 {
-		res := interfaces.ResponseBadRequest{
-			Message: "News Not Found",
-		}
-
-		return res, http.StatusNotFound
-	}
-
 	news.AdditionalImages = newsImage
 
 	return news, http.StatusOK
@@ -181,6 +186,16 @@ func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, news
 
 	if errValidateRes != nil {
 		return errValidateRes, errValidateStatus
+	}
+
+	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
+
+	if err != nil || len(newsDetailRaw) == 0 {
+		res := interfaces.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
 	}
 
 	commentId, err := s.NewsRepository.InsertComment(requestBody.Description, newsId, authorId)

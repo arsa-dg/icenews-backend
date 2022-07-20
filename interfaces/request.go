@@ -15,5 +15,5 @@ type RegisterRequest struct {
 }
 
 type CommentRequest struct {
-	Description string `json:"description" validate:"required,min=4,max=255"`
+	Description string `json:"description" validate:"required,min=1,max=255"`
 }
