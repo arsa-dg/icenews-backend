@@ -69,6 +69,10 @@ type NewsCategoryResponse struct {
 	Data []NewsCategory `json:"data"`
 }
 
+type CommentAddResponse struct {
+	Id int `json:"id"`
+}
+
 type ResponseOK struct {
 	Message string `json:"message"`
 }

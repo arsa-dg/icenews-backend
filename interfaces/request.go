@@ -13,3 +13,7 @@ type RegisterRequest struct {
 	Web      string `json:"web" validate:"required,uri"`
 	Picture  string `json:"picture" validate:"required,uri"`
 }
+
+type CommentRequest struct {
+	Description string `json:"description" validate:"required,min=1,max=255"`
+}
