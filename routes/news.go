@@ -19,6 +19,7 @@ func NewsRoute(DB *pgx.Conn) chi.Router {
 	r.Get("/{id:^[0-9]+}", newsHandler.GetDetail)
 	r.Get("/category", newsHandler.NewsCategory)
 	r.Post("/{id:^[0-9]+}/comment", newsHandler.AddComment)
+	r.Get("/{id:^[0-9]+}/comment", newsHandler.CommentList)
 
 	return r
 }

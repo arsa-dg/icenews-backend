@@ -4,4 +4,4 @@ CREATE TABLE news_images(
   news_id integer not null
 );
 
-ALTER TABLE news_images ADD FOREIGN KEY (news_id) REFERENCES news(id);
+ALTER TABLE news_images ADD FOREIGN KEY (news_id) REFERENCES news(id) ON DELETE CASCADE;

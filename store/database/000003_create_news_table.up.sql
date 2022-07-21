@@ -17,6 +17,6 @@ CREATE TABLE news(
   category_id integer not null
 );
 
-ALTER TABLE news ADD FOREIGN KEY (author_id) REFERENCES users(id);
+ALTER TABLE news ADD FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE;
 
-ALTER TABLE news ADD FOREIGN KEY (category_id) REFERENCES categories(id);
+ALTER TABLE news ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE;

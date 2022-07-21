@@ -96,3 +96,17 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 
 	helper.ResponseOK(w, response)
 }
+
+func (h NewsHandler) CommentList(w http.ResponseWriter, r *http.Request) {
+	newsId := chi.URLParam(r, "id")
+
+	response, statusCode := h.NewsService.CommentListLogic(newsId)
+
+	if statusCode != http.StatusOK {
+		helper.ResponseError(w, statusCode, response)
+
+		return
+	}
+
+	helper.ResponseOK(w, response)
+}

@@ -214,3 +214,21 @@ func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, news
 
 	return res, http.StatusOK
 }
+
+func (s NewsService) CommentListLogic(newsId string) (interface{}, int) {
+	commentList, err := s.NewsRepository.SelectCommentByNewsId(newsId)
+
+	if err != nil {
+		res := interfaces.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	res := interfaces.CommentListResponse{
+		Data: commentList,
+	}
+
+	return res, http.StatusOK
+}

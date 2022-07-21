@@ -1,7 +1,5 @@
 package interfaces
 
-import "github.com/google/uuid"
-
 type AuthLoginResponse struct {
 	Token      string `json:"token"`
 	Scheme     string `json:"scheme"`
@@ -16,37 +14,6 @@ type MeProfileResponse struct {
 	Picture  string `json:"picture"`
 }
 
-type NewsCategory struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type NewsAuthor struct {
-	Id      uuid.UUID `json:"id"`
-	Name    string    `json:"name"`
-	Picture string    `json:"picture"`
-}
-
-type NewsCounter struct {
-	Upvote   int `json:"upvote"`
-	Downvote int `json:"downvote"`
-	Comment  int `json:"comment"`
-	View     int `json:"view"`
-}
-
-type NewsList struct {
-	Id               int          `json:"id"`
-	Title            string       `json:"title"`
-	SlugUrl          string       `json:"slug_url"`
-	CoverImage       string       `json:"cover_image"`
-	AdditionalImages []string     `json:"additional_images"`
-	Nsfw             bool         `json:"nsfw"`
-	Category         NewsCategory `json:"category"`
-	Author           NewsAuthor   `json:"author"`
-	Counter          NewsCounter  `json:"counter"`
-	CreatedAt        string       `json:"created_at"`
-}
-
 type NewsDetailResponse struct {
 	Id               int          `json:"id"`
 	Title            string       `json:"title"`
@@ -56,7 +23,7 @@ type NewsDetailResponse struct {
 	AdditionalImages []string     `json:"additional_images"`
 	Nsfw             bool         `json:"nsfw"`
 	Category         NewsCategory `json:"category"`
-	Author           NewsAuthor   `json:"author"`
+	Author           Author       `json:"author"`
 	Counter          NewsCounter  `json:"counter"`
 	CreatedAt        string       `json:"created_at"`
 }
@@ -71,6 +38,10 @@ type NewsCategoryResponse struct {
 
 type CommentAddResponse struct {
 	Id int `json:"id"`
+}
+
+type CommentListResponse struct {
+	Data []Comment `json:"data"`
 }
 
 type ResponseOK struct {
