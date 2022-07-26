@@ -14,12 +14,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type NewsService struct {
-	Validator      *validator.Validate
-	NewsRepository repository.NewsRepository
+type NewsServiceInterface interface {
+	GetAllLogic(query url.Values) (interface{}, int)
+	GetDetailLogic(id string) (interface{}, int)
+	NewsCategoryLogic() (interface{}, int)
+	AddCommentLogic(requestBody interfaces.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int)
+	CommentListLogic(newsId string) (interface{}, int)
 }
 
-func NewNewsService(r repository.NewsRepository) NewsService {
+type NewsService struct {
+	Validator      *validator.Validate
+	NewsRepository repository.NewsRepositoryInterface
+}
+
+func NewNewsService(r repository.NewsRepositoryInterface) NewsService {
 	return NewsService{validator.New(), r}
 }
 

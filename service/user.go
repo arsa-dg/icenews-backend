@@ -12,12 +12,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
-	Validator      *validator.Validate
-	UserRepository repository.UserRepository
+type UserServiceInterface interface {
+	LoginLogic(request interfaces.LoginRequest) (interface{}, int)
+	RegisterLogic(request interfaces.RegisterRequest) (interface{}, int)
+	ProfileLogic(id uuid.UUID) (interface{}, int)
 }
 
-func NewUserService(r repository.UserRepository) UserService {
+type UserService struct {
+	Validator      *validator.Validate
+	UserRepository repository.UserRepositoryInterface
+}
+
+func NewUserService(r repository.UserRepositoryInterface) UserService {
 	return UserService{validator.New(), r}
 }
 

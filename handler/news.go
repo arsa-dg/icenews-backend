@@ -11,11 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type NewsHandler struct {
-	NewsService service.NewsService
+type NewsHandlerInterface interface {
+	GetAll(w http.ResponseWriter, r *http.Request)
+	GetDetail(w http.ResponseWriter, r *http.Request)
+	NewsCategory(w http.ResponseWriter, r *http.Request)
+	AddComment(w http.ResponseWriter, r *http.Request)
+	CommentList(w http.ResponseWriter, r *http.Request)
 }
 
-func NewNewsHandler(s service.NewsService) NewsHandler {
+type NewsHandler struct {
+	NewsService service.NewsServiceInterface
+}
+
+func NewNewsHandler(s service.NewsServiceInterface) NewsHandler {
 	return NewsHandler{s}
 }
 

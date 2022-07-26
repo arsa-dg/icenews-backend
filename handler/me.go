@@ -9,11 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type MeHandler struct {
-	UserService service.UserService
+type MeHandlerInterface interface {
+	Profile(w http.ResponseWriter, r *http.Request)
 }
 
-func NewMeHandler(s service.UserService) MeHandler {
+type MeHandler struct {
+	UserService service.UserServiceInterface
+}
+
+func NewMeHandler(s service.UserServiceInterface) MeHandler {
 	return MeHandler{s}
 }
 

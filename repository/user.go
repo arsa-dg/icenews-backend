@@ -8,6 +8,12 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+type UserRepositoryInterface interface {
+	SelectByUsername(username string) (interfaces.User, error)
+	SelectById(id uuid.UUID) (interfaces.User, error)
+	Insert(user interfaces.User) error
+}
+
 type UserRepository struct {
 	DB *pgx.Conn
 }

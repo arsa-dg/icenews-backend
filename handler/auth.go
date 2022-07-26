@@ -8,11 +8,17 @@ import (
 	"net/http"
 )
 
-type AuthHandler struct {
-	UserService service.UserService
+type AuthHandlerInterface interface {
+	Login(w http.ResponseWriter, r *http.Request)
+	Token(w http.ResponseWriter, r *http.Request)
+	Register(w http.ResponseWriter, r *http.Request)
 }
 
-func NewAuthHandler(s service.UserService) AuthHandler {
+type AuthHandler struct {
+	UserService service.UserServiceInterface
+}
+
+func NewAuthHandler(s service.UserServiceInterface) AuthHandler {
 	return AuthHandler{s}
 }
 

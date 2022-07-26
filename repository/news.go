@@ -8,6 +8,14 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+type NewsRepositoryInterface interface {
+	SelectAll(category string, scope string) ([]interfaces.NewsListRaw, error)
+	SelectById(id string) ([]interfaces.NewsDetailRaw, error)
+	SelectAllCategory() ([]interfaces.NewsCategory, error)
+	InsertComment(description, newsId string, authorId uuid.UUID) (int, error)
+	SelectCommentByNewsId(newsId string) ([]interfaces.Comment, error)
+}
+
 type NewsRepository struct {
 	DB *pgx.Conn
 }
