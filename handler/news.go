@@ -9,15 +9,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type NewsHandler struct {
 	NewsService service.NewsService
 }
 
-func NewNewsHandler(DB *pgx.Conn) NewsHandler {
-	return NewsHandler{service.NewNewsService(DB)}
+func NewNewsHandler(s service.NewsService) NewsHandler {
+	return NewsHandler{s}
 }
 
 func (h NewsHandler) GetAll(w http.ResponseWriter, r *http.Request) {

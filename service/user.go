@@ -17,8 +17,8 @@ type UserService struct {
 	UserRepository repository.UserRepository
 }
 
-func NewUserService(DB *pgx.Conn) UserService {
-	return UserService{validator.New(), repository.NewUserRepository(DB)}
+func NewUserService(r repository.UserRepository) UserService {
+	return UserService{validator.New(), r}
 }
 
 func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {

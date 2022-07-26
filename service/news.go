@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type NewsService struct {
@@ -20,8 +19,8 @@ type NewsService struct {
 	NewsRepository repository.NewsRepository
 }
 
-func NewNewsService(DB *pgx.Conn) NewsService {
-	return NewsService{validator.New(), repository.NewNewsRepository(DB)}
+func NewNewsService(r repository.NewsRepository) NewsService {
+	return NewsService{validator.New(), r}
 }
 
 func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {

@@ -6,16 +6,14 @@ import (
 	"icenews/backend/interfaces"
 	"icenews/backend/service"
 	"net/http"
-
-	"github.com/jackc/pgx/v4"
 )
 
 type AuthHandler struct {
 	UserService service.UserService
 }
 
-func NewAuthHandler(DB *pgx.Conn) AuthHandler {
-	return AuthHandler{service.NewUserService(DB)}
+func NewAuthHandler(s service.UserService) AuthHandler {
+	return AuthHandler{s}
 }
 
 func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {

@@ -3,13 +3,17 @@ package routes
 import (
 	"icenews/backend/handler"
 	"icenews/backend/middleware"
+	"icenews/backend/repository"
+	"icenews/backend/service"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4"
 )
 
 func NewsRoute(DB *pgx.Conn) chi.Router {
-	newsHandler := handler.NewNewsHandler(DB)
+	newsRepository := repository.NewNewsRepository(DB)
+	newsService := service.NewNewsService(newsRepository)
+	newsHandler := handler.NewNewsHandler(newsService)
 
 	r := chi.NewRouter()
 

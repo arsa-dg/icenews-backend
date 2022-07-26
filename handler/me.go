@@ -7,15 +7,14 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type MeHandler struct {
 	UserService service.UserService
 }
 
-func NewMeHandler(DB *pgx.Conn) MeHandler {
-	return MeHandler{service.NewUserService(DB)}
+func NewMeHandler(s service.UserService) MeHandler {
+	return MeHandler{s}
 }
 
 func (h MeHandler) Profile(w http.ResponseWriter, r *http.Request) {
