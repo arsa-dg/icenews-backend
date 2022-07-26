@@ -2,18 +2,18 @@ package repository
 
 import (
 	"context"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
 type NewsRepositoryInterface interface {
-	SelectAll(category string, scope string) ([]interfaces.NewsListRaw, error)
-	SelectById(id string) ([]interfaces.NewsDetailRaw, error)
-	SelectAllCategory() ([]interfaces.NewsCategory, error)
+	SelectAll(category string, scope string) ([]model.NewsListRaw, error)
+	SelectById(id string) ([]model.NewsDetailRaw, error)
+	SelectAllCategory() ([]model.NewsCategory, error)
 	InsertComment(description, newsId string, authorId uuid.UUID) (int, error)
-	SelectCommentByNewsId(newsId string) ([]interfaces.Comment, error)
+	SelectCommentByNewsId(newsId string) ([]model.Comment, error)
 }
 
 type NewsRepository struct {
@@ -24,10 +24,10 @@ func NewNewsRepository(DB *pgx.Conn) NewsRepository {
 	return NewsRepository{DB}
 }
 
-func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.NewsListRaw, error) {
+func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsListRaw, error) {
 	var rows pgx.Rows
 	var err error
-	var newsListRaw []interfaces.NewsListRaw
+	var newsListRaw []model.NewsListRaw
 
 	query := `SELECT
 		news.id, news.title, news.slug_url, news.cover_image, COALESCE(news_images.image, ''),
@@ -61,7 +61,7 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.N
 	}
 
 	for rows.Next() {
-		news := interfaces.NewsListRaw{}
+		news := model.NewsListRaw{}
 
 		errScan := rows.Scan(
 			&news.Id, &news.Title, &news.SlugUrl, &news.CoverImage,
@@ -81,8 +81,8 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]interfaces.N
 	return newsListRaw, err
 }
 
-func (r NewsRepository) SelectById(id string) ([]interfaces.NewsDetailRaw, error) {
-	newsDetailRaw := []interfaces.NewsDetailRaw{}
+func (r NewsRepository) SelectById(id string) ([]model.NewsDetailRaw, error) {
+	newsDetailRaw := []model.NewsDetailRaw{}
 
 	rows, err := r.DB.Query(context.Background(), `SELECT
 		news.id, news.title, news.content, news.slug_url, news.cover_image, 
@@ -101,7 +101,7 @@ func (r NewsRepository) SelectById(id string) ([]interfaces.NewsDetailRaw, error
 	}
 
 	for rows.Next() {
-		news := interfaces.NewsDetailRaw{}
+		news := model.NewsDetailRaw{}
 
 		errScan := rows.Scan(
 			&news.Id, &news.Title, &news.Content, &news.SlugUrl, &news.CoverImage,
@@ -121,17 +121,17 @@ func (r NewsRepository) SelectById(id string) ([]interfaces.NewsDetailRaw, error
 	return newsDetailRaw, err
 }
 
-func (r NewsRepository) SelectAllCategory() ([]interfaces.NewsCategory, error) {
+func (r NewsRepository) SelectAllCategory() ([]model.NewsCategory, error) {
 	rows, err := r.DB.Query(context.Background(), "SELECT * FROM categories;")
 
 	if err != nil {
 		return nil, err
 	}
 
-	categoryList := []interfaces.NewsCategory{}
+	categoryList := []model.NewsCategory{}
 
 	for rows.Next() {
-		category := interfaces.NewsCategory{}
+		category := model.NewsCategory{}
 
 		errScan := rows.Scan(&category.Id, &category.Name)
 
@@ -158,7 +158,7 @@ func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.
 	return commentId, err
 }
 
-func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]interfaces.Comment, error) {
+func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]model.Comment, error) {
 	rows, err := r.DB.Query(context.Background(), `SELECT
 		comments.id, comments.description, users.id, users.name, users.picture, 
 		TO_CHAR(comments.created_at, 'YYYY-MM-DD"T"HH:MI:SS"Z')
@@ -171,10 +171,10 @@ func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]interfaces.Comme
 		return nil, err
 	}
 
-	commentList := []interfaces.Comment{}
+	commentList := []model.Comment{}
 
 	for rows.Next() {
-		comment := interfaces.Comment{}
+		comment := model.Comment{}
 
 		errScan := rows.Scan(
 			&comment.Id, &comment.Description, &comment.Commentator.Id,

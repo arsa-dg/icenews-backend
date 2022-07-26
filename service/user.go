@@ -2,7 +2,7 @@ package service
 
 import (
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/repository"
 	"net/http"
 
@@ -13,8 +13,8 @@ import (
 )
 
 type UserServiceInterface interface {
-	LoginLogic(request interfaces.LoginRequest) (interface{}, int)
-	RegisterLogic(request interfaces.RegisterRequest) (interface{}, int)
+	LoginLogic(request model.LoginRequest) (interface{}, int)
+	RegisterLogic(request model.RegisterRequest) (interface{}, int)
 	ProfileLogic(id uuid.UUID) (interface{}, int)
 }
 
@@ -27,7 +27,7 @@ func NewUserService(r repository.UserRepositoryInterface) UserService {
 	return UserService{validator.New(), r}
 }
 
-func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, int) {
+func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 	// field empty (validation error 422)
 	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, request)
 
@@ -39,7 +39,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 
 	// user not found (invalid credentials 401)
 	if errSelect == pgx.ErrNoRows {
-		res := interfaces.ResponseUnauthorized{
+		res := model.ResponseUnauthorized{
 			Message: "User Not Found",
 		}
 
@@ -50,7 +50,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 
 	// wrong password (invalid credentials 401)
 	if errPass == bcrypt.ErrMismatchedHashAndPassword {
-		res := interfaces.ResponseUnauthorized{
+		res := model.ResponseUnauthorized{
 			Message: "Wrong Password",
 		}
 
@@ -61,7 +61,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 
 	// bad request (400)
 	if errGenerate != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
@@ -69,7 +69,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 	}
 
 	// OK (200)
-	res := interfaces.AuthLoginResponse{
+	res := model.AuthLoginResponse{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,
@@ -78,7 +78,7 @@ func (s UserService) LoginLogic(request interfaces.LoginRequest) (interface{}, i
 	return res, http.StatusOK
 }
 
-func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interface{}, int) {
+func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, int) {
 	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, request)
 
 	if errValidateRes != nil {
@@ -88,7 +88,7 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 	_, err := s.UserRepository.SelectByUsername(request.Username)
 
 	if err != pgx.ErrNoRows {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Username Is Not Available",
 		}
 
@@ -98,7 +98,7 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 	hashPass, errGenerate := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 
 	if errGenerate != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
@@ -106,7 +106,7 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 	}
 
 	id := uuid.New()
-	newUser := interfaces.User{
+	newUser := model.User{
 		Id:       id,
 		Username: request.Username,
 		Password: string(hashPass),
@@ -119,14 +119,14 @@ func (s UserService) RegisterLogic(request interfaces.RegisterRequest) (interfac
 	errInsert := s.UserRepository.Insert(newUser)
 
 	if errInsert != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
 		return res, http.StatusInternalServerError
 	}
 
-	res := interfaces.ResponseOK{
+	res := model.ResponseOK{
 		Message: "Register Success",
 	}
 
@@ -137,14 +137,14 @@ func (s UserService) ProfileLogic(id uuid.UUID) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectById(id)
 
 	if errSelect == pgx.ErrNoRows {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "User Not Found",
 		}
 
 		return res, http.StatusBadRequest
 	}
 
-	res := interfaces.MeProfileResponse{
+	res := model.MeProfileResponse{
 		Username: user.Username,
 		Name:     user.Name,
 		Bio:      user.Bio,

@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/service"
 	"net/http"
 
@@ -67,11 +67,11 @@ func (h NewsHandler) NewsCategory(w http.ResponseWriter, r *http.Request) {
 
 func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	newsId := chi.URLParam(r, "id")
-	var field interfaces.CommentRequest
+	var field model.CommentRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Wrong Request Format",
 		}
 
@@ -84,7 +84,7 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 

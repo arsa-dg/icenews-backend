@@ -2,16 +2,16 @@ package repository
 
 import (
 	"context"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
 type UserRepositoryInterface interface {
-	SelectByUsername(username string) (interfaces.User, error)
-	SelectById(id uuid.UUID) (interfaces.User, error)
-	Insert(user interfaces.User) error
+	SelectByUsername(username string) (model.User, error)
+	SelectById(id uuid.UUID) (model.User, error)
+	Insert(user model.User) error
 }
 
 type UserRepository struct {
@@ -22,8 +22,8 @@ func NewUserRepository(DB *pgx.Conn) UserRepository {
 	return UserRepository{DB}
 }
 
-func (r UserRepository) SelectByUsername(username string) (interfaces.User, error) {
-	user := interfaces.User{}
+func (r UserRepository) SelectByUsername(username string) (model.User, error) {
+	user := model.User{}
 
 	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
 		&user.Id,
@@ -38,8 +38,8 @@ func (r UserRepository) SelectByUsername(username string) (interfaces.User, erro
 	return user, err
 }
 
-func (r UserRepository) SelectById(id uuid.UUID) (interfaces.User, error) {
-	user := interfaces.User{}
+func (r UserRepository) SelectById(id uuid.UUID) (model.User, error) {
+	user := model.User{}
 
 	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE id=$1", id).Scan(
 		&user.Id,
@@ -54,7 +54,7 @@ func (r UserRepository) SelectById(id uuid.UUID) (interfaces.User, error) {
 	return user, err
 }
 
-func (r UserRepository) Insert(user interfaces.User) error {
+func (r UserRepository) Insert(user model.User) error {
 	_, err := r.DB.Exec(context.Background(), `INSERT INTO
 		users(
 			id, username, password, name, bio, web, picture
