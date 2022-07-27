@@ -38,7 +38,7 @@ func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectByUsername(request.Username)
 
 	// user not found (invalid credentials 401)
-	if errSelect == pgx.ErrNoRows {
+	if errSelect == pgx.ErrNoRows || user.Username == "" {
 		res := model.ResponseUnauthorized{
 			Message: "User Not Found",
 		}
@@ -59,7 +59,7 @@ func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 
 	token, expiresAt, errGenerate := helper.CreateJWT(user.Id.String())
 
-	// bad request (400)
+	// internal server error (500)
 	if errGenerate != nil {
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
@@ -85,9 +85,9 @@ func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, 
 		return errValidateRes, errValidateStatus
 	}
 
-	_, err := s.UserRepository.SelectByUsername(request.Username)
+	user, errSelect := s.UserRepository.SelectByUsername(request.Username)
 
-	if err != pgx.ErrNoRows {
+	if errSelect == nil || user.Username == request.Username {
 		res := model.ResponseBadRequest{
 			Message: "Username Is Not Available",
 		}
@@ -136,7 +136,7 @@ func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, 
 func (s UserService) ProfileLogic(id uuid.UUID) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectById(id)
 
-	if errSelect == pgx.ErrNoRows {
+	if errSelect == pgx.ErrNoRows || user.Username == "" {
 		res := model.ResponseBadRequest{
 			Message: "User Not Found",
 		}
