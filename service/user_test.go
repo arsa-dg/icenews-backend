@@ -41,23 +41,11 @@ type UserRepositoryMock struct {
 func (r UserRepositoryMock) SelectByUsername(username string) (model.User, error) {
 	args := r.Called(username)
 
-	for _, user := range users {
-		if user.Username == username {
-			return args.Get(0).(model.User), args.Error(1)
-		}
-	}
-
 	return args.Get(0).(model.User), args.Error(1)
 }
 
 func (r UserRepositoryMock) SelectById(id uuid.UUID) (model.User, error) {
 	args := r.Called(id)
-
-	for _, user := range users {
-		if user.Id == id {
-			return args.Get(0).(model.User), args.Error(1)
-		}
-	}
 
 	return args.Get(0).(model.User), args.Error(1)
 }
@@ -68,7 +56,6 @@ func (r UserRepositoryMock) Insert(user model.User) error {
 	return args.Error(0)
 }
 
-// Login OK
 func TestService_LoginLogicOK(t *testing.T) {
 	userRepository := UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester123").Return(users[0], nil)
@@ -82,7 +69,6 @@ func TestService_LoginLogicOK(t *testing.T) {
 	assert.IsType(t, model.AuthLoginResponse{}, res)
 }
 
-// User Not Found
 func TestService_LoginLogicErrorUserNotFound(t *testing.T) {
 	userRepository := UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester12").Return(model.User{}, errors.New("User not found"))
