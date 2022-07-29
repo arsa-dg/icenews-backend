@@ -36,9 +36,9 @@ func TestUserRepository_SelectByUsernameOK(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM users WHERE username=$1")).WithArgs(user1.Username).WillReturnRows(rows)
 
 	userRepository := NewUserRepository(DB)
-	_, errSelect := userRepository.SelectByUsername(user1.Username)
+	user, _ := userRepository.SelectByUsername(user1.Username)
 
-	assert.Nil(t, errSelect)
+	assert.Equal(t, user1, user)
 }
 
 func TestUserRepository_SelectByUsernameErrorUserNotFound(t *testing.T) {
@@ -76,9 +76,9 @@ func TestUserRepository_SelectByIdOK(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM users WHERE id=$1")).WithArgs(user1.Id).WillReturnRows(rows)
 
 	userRepository := NewUserRepository(DB)
-	_, errSelect := userRepository.SelectById(user1.Id)
+	user, _ := userRepository.SelectById(user1.Id)
 
-	assert.Nil(t, errSelect)
+	assert.Equal(t, user1, user)
 }
 
 func TestUserRepository_SelectByIdErrorUserNotFound(t *testing.T) {
