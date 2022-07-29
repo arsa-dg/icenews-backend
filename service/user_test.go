@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"database/sql"
 	"icenews/backend/model"
 	"testing"
 
@@ -10,12 +10,9 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var uuid1 = uuid.New()
-var uuid2 = uuid.New()
-
 var users = []model.User{
 	{
-		Id:       uuid1,
+		Id:       uuid.New(),
 		Username: "tester123",
 		Password: "$2a$10$NEQETyrW4pBS1e/dX1DSAOQoZaD/x./sNm5PJQuz34BeGt6Y5b3Zm",
 		Name:     "test",
@@ -24,7 +21,7 @@ var users = []model.User{
 		Picture:  "test pict",
 	},
 	{
-		Id:       uuid2,
+		Id:       uuid.New(),
 		Username: "tester1234",
 		Password: "$2a$10$NEQETyrW4pBS1e/dX1DSAOQoZaD/x./sNm5PJQuz34BeGt6Y5b3Zm",
 		Name:     "test1",
@@ -71,7 +68,7 @@ func TestService_LoginLogicOK(t *testing.T) {
 
 func TestService_LoginLogicErrorUserNotFound(t *testing.T) {
 	userRepository := UserRepositoryMock{}
-	userRepository.On("SelectByUsername", "tester12").Return(model.User{}, errors.New("User not found"))
+	userRepository.On("SelectByUsername", "tester12").Return(model.User{}, sql.ErrNoRows)
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.LoginLogic(model.LoginRequest{
@@ -119,7 +116,7 @@ func TestService_RegisterLogicOK(t *testing.T) {
 		Picture:  "https://github.com/JuanCrg90/Clean-Code-Notes#chapter9",
 	}
 
-	userRepository.On("SelectByUsername", req.Username).Return(model.User{}, errors.New("User not found"))
+	userRepository.On("SelectByUsername", req.Username).Return(model.User{}, sql.ErrNoRows)
 	userRepository.On("Insert", mock.AnythingOfType("model.User")).Return(nil)
 
 	userService := NewUserService(userRepository)
@@ -163,10 +160,10 @@ func TestService_RegisterLogicErrorValidation(t *testing.T) {
 
 func TestService_ProfileLogicOK(t *testing.T) {
 	userRepository := UserRepositoryMock{}
-	userRepository.On("SelectById", uuid1).Return(users[0], nil)
+	userRepository.On("SelectById", users[0].Id).Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
-	res, _ := userService.ProfileLogic(uuid1)
+	res, _ := userService.ProfileLogic(users[0].Id)
 
 	assert.IsType(t, model.MeProfileResponse{}, res)
 }
@@ -175,7 +172,7 @@ func TestService_ProfileLogicErrorUserNotFound(t *testing.T) {
 	uuid3 := uuid.New()
 
 	userRepository := UserRepositoryMock{}
-	userRepository.On("SelectById", uuid3).Return(model.User{}, errors.New("User not found"))
+	userRepository.On("SelectById", uuid3).Return(model.User{}, sql.ErrNoRows)
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.ProfileLogic(uuid3)
