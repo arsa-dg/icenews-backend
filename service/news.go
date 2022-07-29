@@ -197,7 +197,7 @@ func (s NewsService) AddCommentLogic(requestBody model.CommentRequest, newsId st
 
 	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
 
-	if err != nil || len(newsDetailRaw) == 0 {
+	if len(newsDetailRaw) == 0 {
 		res := model.ResponseBadRequest{
 			Message: "News Not Found",
 		}
@@ -223,6 +223,16 @@ func (s NewsService) AddCommentLogic(requestBody model.CommentRequest, newsId st
 }
 
 func (s NewsService) CommentListLogic(newsId string) (interface{}, int) {
+	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
+
+	if len(newsDetailRaw) == 0 {
+		res := model.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
+	}
+
 	commentList, err := s.NewsRepository.SelectCommentByNewsId(newsId)
 
 	if err != nil {

@@ -97,7 +97,6 @@ func TestService_LoginLogicErrorWrongPassword(t *testing.T) {
 
 func TestService_LoginLogicErrorValidation(t *testing.T) {
 	userRepository := UserRepositoryMock{}
-	userRepository.On("SelectByUsername", "tes").Return(model.User{}, errors.New("User not found"))
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.LoginLogic(model.LoginRequest{
@@ -148,7 +147,6 @@ func TestService_RegisterLogicErrorUsernameNotAvailable(t *testing.T) {
 
 func TestService_RegisterLogicErrorValidation(t *testing.T) {
 	userRepository := UserRepositoryMock{}
-	userRepository.On("SelectByUsername", "tester12").Return(model.User{}, errors.New("User not found"))
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.RegisterLogic(model.RegisterRequest{
