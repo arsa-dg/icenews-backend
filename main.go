@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"icenews/backend/config"
 	"icenews/backend/repository"
 	"icenews/backend/routes"
@@ -17,7 +16,7 @@ func main() {
 
 	DB := config.ConnectDB()
 
-	defer DB.Close(context.Background())
+	defer DB.Close()
 
 	router := chi.NewRouter()
 

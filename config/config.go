@@ -1,14 +1,15 @@
 package config
 
 import (
-	"context"
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/stdlib"
 )
 
-func ConnectDB() *pgx.Conn {
+func ConnectDB() *sql.DB {
 	DBDriver := os.Getenv("DB_DRIVER")
 	DBUser := os.Getenv("DB_USER")
 	DBPassword := os.Getenv("DB_PASSWORD")
@@ -18,17 +19,15 @@ func ConnectDB() *pgx.Conn {
 
 	DBUrl := DBDriver + "://" + DBUser + ":" + DBPassword + "@" + DBHost + ":" + DBPort + "/" + DBName
 
-	connConfig, err := pgx.ParseConfig(DBUrl)
+	conCfg, err := pgx.ParseConfig(DBUrl)
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Parse config failed:", err)
 	}
 
-	DB, err := pgx.ConnectConfig(context.Background(), connConfig)
+	conCfg.LogLevel = pgx.LogLevelNone
 
-	if err != nil {
-		log.Fatalln(err)
-	}
+	DB := stdlib.OpenDB(*conCfg)
 
 	return DB
 }
