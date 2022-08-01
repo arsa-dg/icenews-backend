@@ -83,6 +83,26 @@ func TestService_LoginLogicErrorValidation(t *testing.T) {
 	assert.IsType(t, model.ResponseValidationFailed{}, res)
 }
 
+func TestService_TokenLogicOK(t *testing.T) {
+	userRepository := UserRepositoryMock{}
+	userRepository.On("SelectById", mock.AnythingOfType("uuid.UUID")).Return(users[0], nil)
+
+	userService := NewUserService(userRepository)
+	res, _ := userService.TokenLogic("0237d1b5-051d-41d5-b160-cde2d6ebf61a")
+
+	assert.IsType(t, model.AuthLoginResponse{}, res)
+}
+
+func TestService_TokenLogicErrorUserNotFound(t *testing.T) {
+	userRepository := UserRepositoryMock{}
+	userRepository.On("SelectById", mock.AnythingOfType("uuid.UUID")).Return(model.User{}, nil)
+
+	userService := NewUserService(userRepository)
+	res, _ := userService.TokenLogic("9237d1b5-051d-41d5-b160-cde2d6ebf61b")
+
+	assert.IsType(t, model.ResponseBadRequest{}, res)
+}
+
 func TestService_RegisterLogicOK(t *testing.T) {
 	userRepository := repoMock.UserRepositoryMock{}
 
