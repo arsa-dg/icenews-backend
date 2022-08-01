@@ -18,7 +18,7 @@ func (s UserServiceMock) ProfileLogic(id uuid.UUID) (interface{}, int) {
 	return args.Get(0), args.Int(1)
 }
 
-func TestAuthHandler_ProfileOK(t *testing.T) {
+func TestMeHandler_ProfileOK(t *testing.T) {
 	userService := UserServiceMock{}
 	userService.On("ProfileLogic", mock.AnythingOfType("uuid.UUID")).Return(model.MeProfileResponse{
 		Username: "tester123",
