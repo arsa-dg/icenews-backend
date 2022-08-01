@@ -71,11 +71,11 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := model.ResponseBadRequest{
-			Message: "Wrong Request Format",
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
 		}
 
-		helper.ResponseError(w, http.StatusBadRequest, res)
+		helper.ResponseError(w, http.StatusInternalServerError, res)
 
 		return
 	}

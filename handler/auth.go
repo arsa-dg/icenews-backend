@@ -27,11 +27,11 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := model.ResponseBadRequest{
-			Message: "Wrong Request Format",
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
 		}
 
-		helper.ResponseError(w, http.StatusBadRequest, res)
+		helper.ResponseError(w, http.StatusInternalServerError, res)
 
 		return
 	}
@@ -49,26 +49,14 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value("user_id").(string)
 
-	token, expiresAt, err := helper.CreateJWT(userId)
+	response, statusCode := h.UserService.TokenLogic(userId)
 
-	// bad request (400)
-	if err != nil {
-		res := model.ResponseInternalServerError{
-			Message: "Something Is Wrong",
-		}
-
-		helper.ResponseError(w, http.StatusInternalServerError, res)
-
+	if statusCode != http.StatusOK {
+		helper.ResponseError(w, statusCode, response)
 		return
 	}
 
-	res := model.AuthLoginResponse{
-		Token:      token,
-		Scheme:     "Bearer",
-		Expires_at: expiresAt,
-	}
-
-	helper.ResponseOK(w, res)
+	helper.ResponseOK(w, response)
 }
 
 func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +64,11 @@ func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := model.ResponseBadRequest{
-			Message: "Wrong Request Format",
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
 		}
 
-		helper.ResponseError(w, http.StatusBadRequest, res)
+		helper.ResponseError(w, http.StatusInternalServerError, res)
 
 		return
 	}
