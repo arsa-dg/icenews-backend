@@ -7,23 +7,17 @@ import (
 	"icenews/backend/model"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func MiddlewareAuth(next http.Handler) http.Handler {
+func JWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var userId string
-		isGetToken := false
 		secretKey := os.Getenv("SECRET_KEY")
 
 		auth := r.Header.Get("Authorization")
-
-		if path.Base(r.URL.Path) == "token" {
-			isGetToken = true
-		}
 
 		if auth == "" {
 			res := model.ResponseUnauthorized{
@@ -43,7 +37,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 				return []byte(secretKey), nil
 			})
 
-			if claims, ok := token.Claims.(jwt.MapClaims); ok && (token.Valid || isGetToken) {
+			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 				userId = claims["user_id"].(string)
 
 				ctx := context.WithValue(r.Context(), "user_id", userId)
