@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"icenews/backend/model"
+	serviceMock "icenews/backend/service/mock"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -14,42 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type NewsServiceMock struct {
-	mock.Mock
-}
-
-func (s NewsServiceMock) GetAllLogic(query url.Values) (interface{}, int) {
-	args := s.Called(query)
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s NewsServiceMock) GetDetailLogic(id string) (interface{}, int) {
-	args := s.Called(id)
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s NewsServiceMock) NewsCategoryLogic() (interface{}, int) {
-	args := s.Called()
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s NewsServiceMock) AddCommentLogic(requestBody model.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int) {
-	args := s.Called(requestBody, newsId, authorId)
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s NewsServiceMock) CommentListLogic(newsId string) (interface{}, int) {
-	args := s.Called(newsId)
-
-	return args.Get(0), args.Int(1)
-}
-
 func TestNewsHandler_GetAllOK(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("GetAllLogic", mock.AnythingOfType("url.Values")).Return(model.NewsListResponse{
 		Data: []model.NewsList{
 			{
@@ -92,7 +58,7 @@ func TestNewsHandler_GetAllOK(t *testing.T) {
 }
 
 func TestNewsHandler_GetAllError(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("GetAllLogic", mock.AnythingOfType("url.Values")).Return(model.ResponseBadRequest{
 		Message: "Category Must Be An Integer",
 	}, http.StatusBadRequest)
@@ -110,7 +76,7 @@ func TestNewsHandler_GetAllError(t *testing.T) {
 }
 
 func TestNewsHandler_GetDetailOK(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("GetDetailLogic", mock.Anything).Return(model.NewsDetailResponse{
 		Id:               1,
 		Title:            "some news",
@@ -150,7 +116,7 @@ func TestNewsHandler_GetDetailOK(t *testing.T) {
 }
 
 func TestNewsHandler_GetDetailError(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("GetDetailLogic", mock.Anything).Return(model.ResponseBadRequest{
 		Message: "News Not Found",
 	}, http.StatusBadRequest)
@@ -168,7 +134,7 @@ func TestNewsHandler_GetDetailError(t *testing.T) {
 }
 
 func TestNewsHandler_NewsCategoryOK(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("NewsCategoryLogic").Return(model.NewsCategoryResponse{
 		Data: []model.NewsCategory{
 			{
@@ -195,7 +161,7 @@ func TestNewsHandler_NewsCategoryOK(t *testing.T) {
 }
 
 func TestNewsHandler_AddCommentOK(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("AddCommentLogic", mock.AnythingOfType("model.CommentRequest"), mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(model.CommentAddResponse{
 		Id: 17,
 	}, http.StatusOK)
@@ -219,7 +185,7 @@ func TestNewsHandler_AddCommentOK(t *testing.T) {
 }
 
 func TestNewsHandler_AddCommentError(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("AddCommentLogic", mock.AnythingOfType("model.CommentRequest"), mock.Anything, mock.AnythingOfType("uuid.UUID")).Return(model.ResponseBadRequest{
 		Message: "News Not Found",
 	}, http.StatusBadRequest)
@@ -243,7 +209,7 @@ func TestNewsHandler_AddCommentError(t *testing.T) {
 }
 
 func TestNewsHandler_CommentListOK(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("CommentListLogic", mock.Anything).Return(model.CommentListResponse{
 		Data: []model.Comment{
 			{
@@ -271,7 +237,7 @@ func TestNewsHandler_CommentListOK(t *testing.T) {
 }
 
 func TestNewsHandler_CommentListError(t *testing.T) {
-	newsService := NewsServiceMock{}
+	newsService := serviceMock.NewsServiceMock{}
 	newsService.On("CommentListLogic", mock.Anything).Return(model.ResponseBadRequest{
 		Message: "News Not Found",
 	}, http.StatusBadRequest)

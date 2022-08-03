@@ -3,39 +3,17 @@ package handler
 import (
 	"context"
 	"icenews/backend/model"
+	serviceMock "icenews/backend/service/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-type UserServiceMock struct {
-	mock.Mock
-}
-
-func (s UserServiceMock) LoginLogic(request model.LoginRequest) (interface{}, int) {
-	args := s.Called(request)
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s UserServiceMock) TokenLogic(id string) (interface{}, int) {
-	args := s.Called(id)
-
-	return args.Get(0), args.Int(1)
-}
-
-func (s UserServiceMock) RegisterLogic(request model.RegisterRequest) (interface{}, int) {
-	args := s.Called(request)
-
-	return args.Get(0), args.Int(1)
-}
-
 func TestAuthHandler_LoginOK(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("LoginLogic", model.LoginRequest{
 		Username: "tester123",
 		Password: "tester",
@@ -60,7 +38,7 @@ func TestAuthHandler_LoginOK(t *testing.T) {
 }
 
 func TestAuthHandler_LoginError(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("LoginLogic", model.LoginRequest{
 		Username: "tester123",
 		Password: "testttt",
@@ -83,7 +61,7 @@ func TestAuthHandler_LoginError(t *testing.T) {
 }
 
 func TestAuthHandler_TokenOK(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("TokenLogic", "someuserid").Return(model.AuthLoginResponse{
 		Token:      "someNEWrandomtoken",
 		Scheme:     "Bearer",
@@ -108,7 +86,7 @@ func TestAuthHandler_TokenOK(t *testing.T) {
 }
 
 func TestAuthHandler_TokenError(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("TokenLogic", "someuserid").Return(model.ResponseBadRequest{
 		Message: "User Not Found",
 	}, http.StatusBadRequest)
@@ -130,7 +108,7 @@ func TestAuthHandler_TokenError(t *testing.T) {
 }
 
 func TestAuthHandler_RegisterOK(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("RegisterLogic", model.RegisterRequest{
 		Username: "tester12",
 		Password: "tester",
@@ -157,7 +135,7 @@ func TestAuthHandler_RegisterOK(t *testing.T) {
 }
 
 func TestAuthHandler_RegisterError(t *testing.T) {
-	userService := UserServiceMock{}
+	userService := serviceMock.UserServiceMock{}
 	userService.On("RegisterLogic", model.RegisterRequest{
 		Username: "tester123",
 		Password: "tester",
