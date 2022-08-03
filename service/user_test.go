@@ -84,7 +84,7 @@ func TestService_LoginLogicErrorValidation(t *testing.T) {
 }
 
 func TestService_TokenLogicOK(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectById", mock.AnythingOfType("uuid.UUID")).Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
@@ -94,7 +94,7 @@ func TestService_TokenLogicOK(t *testing.T) {
 }
 
 func TestService_TokenLogicErrorUserNotFound(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectById", mock.AnythingOfType("uuid.UUID")).Return(model.User{}, nil)
 
 	userService := NewUserService(userRepository)
