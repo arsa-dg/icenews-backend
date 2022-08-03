@@ -2,12 +2,11 @@ package service
 
 import (
 	"icenews/backend/model"
+	repoMock "icenews/backend/repository/mock"
 	"net/url"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 var newsCategory1 = model.NewsCategory{
@@ -92,42 +91,8 @@ var news1Comment2 = model.Comment{
 	CreatedAt: "2019-08-24T14:15:22Z",
 }
 
-type NewsRepositoryMock struct {
-	mock.Mock
-}
-
-func (r NewsRepositoryMock) SelectAll(category string, scope string) ([]model.NewsListRaw, error) {
-	args := r.Called(category, scope)
-
-	return args.Get(0).([]model.NewsListRaw), args.Error(1)
-}
-
-func (r NewsRepositoryMock) SelectById(id string) ([]model.NewsDetailRaw, error) {
-	args := r.Called(id)
-
-	return args.Get(0).([]model.NewsDetailRaw), args.Error(1)
-}
-
-func (r NewsRepositoryMock) SelectAllCategory() ([]model.NewsCategory, error) {
-	args := r.Called()
-
-	return args.Get(0).([]model.NewsCategory), args.Error(1)
-}
-
-func (r NewsRepositoryMock) InsertComment(description, newsId string, authorId uuid.UUID) (int, error) {
-	args := r.Called(description, newsId, authorId)
-
-	return args.Int(0), args.Error(1)
-}
-
-func (r NewsRepositoryMock) SelectCommentByNewsId(newsId string) ([]model.Comment, error) {
-	args := r.Called(newsId)
-
-	return args.Get(0).([]model.Comment), args.Error(1)
-}
-
 func TestService_GetAllLogicOK(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectAll", "1", "top_news").Return([]model.NewsListRaw{news11, news12}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -141,7 +106,7 @@ func TestService_GetAllLogicOK(t *testing.T) {
 }
 
 func TestService_GetAllLogicErrorCategoryNotInteger(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectAll", "cat1", "top_news").Return([]model.NewsListRaw{}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -155,7 +120,7 @@ func TestService_GetAllLogicErrorCategoryNotInteger(t *testing.T) {
 }
 
 func TestService_GetDetailLogicOK(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectById", "1").Return([]model.NewsDetailRaw{news11Detail, news12Detail}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -166,7 +131,7 @@ func TestService_GetDetailLogicOK(t *testing.T) {
 }
 
 func TestService_GetDetailLogicErrorNewsNotFound(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectById", "2").Return([]model.NewsDetailRaw{}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -177,7 +142,7 @@ func TestService_GetDetailLogicErrorNewsNotFound(t *testing.T) {
 }
 
 func TestService_NewsCategoryLogicOK(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectAllCategory").Return([]model.NewsCategory{newsCategory1, newsCategory2}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -188,7 +153,7 @@ func TestService_NewsCategoryLogicOK(t *testing.T) {
 }
 
 func TestService_AddCommentLogicOK(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 
 	commentReq := model.CommentRequest{Description: "Bagus"}
 
@@ -203,7 +168,7 @@ func TestService_AddCommentLogicOK(t *testing.T) {
 }
 
 func TestService_AddCommentLogicErrorNewsNotFound(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectById", "1").Return([]model.NewsDetailRaw{}, nil)
 
 	newsService := NewNewsService(newsRepository)
@@ -214,7 +179,7 @@ func TestService_AddCommentLogicErrorNewsNotFound(t *testing.T) {
 }
 
 func TestService_AddCommentLogicErrorValidation(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 
 	newsService := NewNewsService(newsRepository)
 
@@ -224,7 +189,7 @@ func TestService_AddCommentLogicErrorValidation(t *testing.T) {
 }
 
 func TestService_CommentListLogicOK(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectById", "1").Return([]model.NewsDetailRaw{news11Detail, news12Detail}, nil)
 	newsRepository.On("SelectCommentByNewsId", "1").Return([]model.Comment{news1Comment1, news1Comment2}, nil)
 
@@ -236,7 +201,7 @@ func TestService_CommentListLogicOK(t *testing.T) {
 }
 
 func TestService_CommentListLogicErrorNewsNotFound(t *testing.T) {
-	newsRepository := NewsRepositoryMock{}
+	newsRepository := repoMock.NewsRepositoryMock{}
 	newsRepository.On("SelectById", "2").Return([]model.NewsDetailRaw{}, nil)
 
 	newsService := NewNewsService(newsRepository)

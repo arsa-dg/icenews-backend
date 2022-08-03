@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"icenews/backend/model"
+	repoMock "icenews/backend/repository/mock"
 	"testing"
 
 	"github.com/google/uuid"
@@ -31,30 +32,8 @@ var users = []model.User{
 	},
 }
 
-type UserRepositoryMock struct {
-	mock.Mock
-}
-
-func (r UserRepositoryMock) SelectByUsername(username string) (model.User, error) {
-	args := r.Called(username)
-
-	return args.Get(0).(model.User), args.Error(1)
-}
-
-func (r UserRepositoryMock) SelectById(id uuid.UUID) (model.User, error) {
-	args := r.Called(id)
-
-	return args.Get(0).(model.User), args.Error(1)
-}
-
-func (r UserRepositoryMock) Insert(user model.User) error {
-	args := r.Called(user)
-
-	return args.Error(0)
-}
-
 func TestService_LoginLogicOK(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester123").Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
@@ -67,7 +46,7 @@ func TestService_LoginLogicOK(t *testing.T) {
 }
 
 func TestService_LoginLogicErrorUserNotFound(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester12").Return(model.User{}, sql.ErrNoRows)
 
 	userService := NewUserService(userRepository)
@@ -80,7 +59,7 @@ func TestService_LoginLogicErrorUserNotFound(t *testing.T) {
 }
 
 func TestService_LoginLogicErrorWrongPassword(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester123").Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
@@ -93,7 +72,7 @@ func TestService_LoginLogicErrorWrongPassword(t *testing.T) {
 }
 
 func TestService_LoginLogicErrorValidation(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.LoginLogic(model.LoginRequest{
@@ -105,7 +84,7 @@ func TestService_LoginLogicErrorValidation(t *testing.T) {
 }
 
 func TestService_RegisterLogicOK(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 
 	req := model.RegisterRequest{
 		Username: "tester12",
@@ -126,7 +105,7 @@ func TestService_RegisterLogicOK(t *testing.T) {
 }
 
 func TestService_RegisterLogicErrorUsernameNotAvailable(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectByUsername", "tester123").Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
@@ -143,7 +122,7 @@ func TestService_RegisterLogicErrorUsernameNotAvailable(t *testing.T) {
 }
 
 func TestService_RegisterLogicErrorValidation(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 
 	userService := NewUserService(userRepository)
 	res, _ := userService.RegisterLogic(model.RegisterRequest{
@@ -159,7 +138,7 @@ func TestService_RegisterLogicErrorValidation(t *testing.T) {
 }
 
 func TestService_ProfileLogicOK(t *testing.T) {
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectById", users[0].Id).Return(users[0], nil)
 
 	userService := NewUserService(userRepository)
@@ -171,7 +150,7 @@ func TestService_ProfileLogicOK(t *testing.T) {
 func TestService_ProfileLogicErrorUserNotFound(t *testing.T) {
 	uuid3 := uuid.New()
 
-	userRepository := UserRepositoryMock{}
+	userRepository := repoMock.UserRepositoryMock{}
 	userRepository.On("SelectById", uuid3).Return(model.User{}, sql.ErrNoRows)
 
 	userService := NewUserService(userRepository)
