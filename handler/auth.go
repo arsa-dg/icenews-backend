@@ -3,27 +3,31 @@ package handler
 import (
 	"encoding/json"
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/service"
 	"net/http"
-
-	"github.com/jackc/pgx/v4"
 )
 
-type AuthHandler struct {
-	UserService service.UserService
+type AuthHandlerInterface interface {
+	Login(w http.ResponseWriter, r *http.Request)
+	Token(w http.ResponseWriter, r *http.Request)
+	Register(w http.ResponseWriter, r *http.Request)
 }
 
-func NewAuthHandler(DB *pgx.Conn) AuthHandler {
-	return AuthHandler{service.NewUserService(DB)}
+type AuthHandler struct {
+	UserService service.UserServiceInterface
+}
+
+func NewAuthHandler(s service.UserServiceInterface) AuthHandler {
+	return AuthHandler{s}
 }
 
 func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var field interfaces.LoginRequest
+	var field model.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Wrong Request Format",
 		}
 
@@ -49,7 +53,7 @@ func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 
 	// bad request (400)
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
@@ -58,7 +62,7 @@ func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := interfaces.AuthLoginResponse{
+	res := model.AuthLoginResponse{
 		Token:      token,
 		Scheme:     "Bearer",
 		Expires_at: expiresAt,
@@ -68,11 +72,11 @@ func (h AuthHandler) Token(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var field interfaces.RegisterRequest
+	var field model.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Wrong Request Format",
 		}
 

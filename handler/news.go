@@ -3,21 +3,28 @@ package handler
 import (
 	"encoding/json"
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
-type NewsHandler struct {
-	NewsService service.NewsService
+type NewsHandlerInterface interface {
+	GetAll(w http.ResponseWriter, r *http.Request)
+	GetDetail(w http.ResponseWriter, r *http.Request)
+	NewsCategory(w http.ResponseWriter, r *http.Request)
+	AddComment(w http.ResponseWriter, r *http.Request)
+	CommentList(w http.ResponseWriter, r *http.Request)
 }
 
-func NewNewsHandler(DB *pgx.Conn) NewsHandler {
-	return NewsHandler{service.NewNewsService(DB)}
+type NewsHandler struct {
+	NewsService service.NewsServiceInterface
+}
+
+func NewNewsHandler(s service.NewsServiceInterface) NewsHandler {
+	return NewsHandler{s}
 }
 
 func (h NewsHandler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -60,11 +67,11 @@ func (h NewsHandler) NewsCategory(w http.ResponseWriter, r *http.Request) {
 
 func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	newsId := chi.URLParam(r, "id")
-	var field interfaces.CommentRequest
+	var field model.CommentRequest
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Wrong Request Format",
 		}
 
@@ -77,7 +84,7 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 

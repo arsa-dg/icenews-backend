@@ -2,20 +2,23 @@ package handler
 
 import (
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/service"
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
-type MeHandler struct {
-	UserService service.UserService
+type MeHandlerInterface interface {
+	Profile(w http.ResponseWriter, r *http.Request)
 }
 
-func NewMeHandler(DB *pgx.Conn) MeHandler {
-	return MeHandler{service.NewUserService(DB)}
+type MeHandler struct {
+	UserService service.UserServiceInterface
+}
+
+func NewMeHandler(s service.UserServiceInterface) MeHandler {
+	return MeHandler{s}
 }
 
 func (h MeHandler) Profile(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +26,7 @@ func (h MeHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 

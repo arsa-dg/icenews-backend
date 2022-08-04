@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"net/http"
 	"os"
 	"path"
@@ -26,7 +26,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 		}
 
 		if auth == "" {
-			res := interfaces.ResponseUnauthorized{
+			res := model.ResponseUnauthorized{
 				Message: "Authorization is missing",
 			}
 
@@ -49,7 +49,7 @@ func MiddlewareAuth(next http.Handler) http.Handler {
 				ctx := context.WithValue(r.Context(), "user_id", userId)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
-				res := interfaces.ResponseUnauthorized{
+				res := model.ResponseUnauthorized{
 					Message: err.Error(),
 				}
 

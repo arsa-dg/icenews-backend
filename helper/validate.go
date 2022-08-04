@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -26,14 +26,14 @@ func RequestValidation(Validator *validator.Validate, request interface{}) (inte
 	errValidate := Validator.Struct(request)
 
 	if errValidate != nil {
-		res := interfaces.ResponseValidationFailed{
+		res := model.ResponseValidationFailed{
 			Message: "Field(s) validation error",
 		}
 
-		var emptyFields []interfaces.FieldError
+		var emptyFields []model.FieldError
 
 		for _, err := range errValidate.(validator.ValidationErrors) {
-			toAdd := interfaces.FieldError{
+			toAdd := model.FieldError{
 				Name:  err.Field(),
 				Error: ErrMsg(err.Tag()),
 			}

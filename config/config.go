@@ -2,7 +2,7 @@ package config
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/jackc/pgx/v4"
@@ -18,9 +18,16 @@ func ConnectDB() *pgx.Conn {
 
 	DBUrl := DBDriver + "://" + DBUser + ":" + DBPassword + "@" + DBHost + ":" + DBPort + "/" + DBName
 
-	DB, err := pgx.Connect(context.Background(), DBUrl)
+	connConfig, err := pgx.ParseConfig(DBUrl)
+
 	if err != nil {
-		fmt.Println("Error while connecting to database!")
+		log.Fatalln(err)
+	}
+
+	DB, err := pgx.ConnectConfig(context.Background(), connConfig)
+
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	return DB

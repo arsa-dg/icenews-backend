@@ -3,13 +3,13 @@ package routes
 import (
 	"icenews/backend/handler"
 	"icenews/backend/middleware"
+	"icenews/backend/service"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v4"
 )
 
-func AuthRoute(DB *pgx.Conn) chi.Router {
-	authHandler := handler.NewAuthHandler(DB)
+func AuthRoute(s service.UserServiceInterface) chi.Router {
+	authHandler := handler.NewAuthHandler(s)
 
 	r := chi.NewRouter()
 

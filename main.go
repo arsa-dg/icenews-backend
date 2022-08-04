@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"icenews/backend/config"
+	"icenews/backend/repository"
 	"icenews/backend/routes"
+	"icenews/backend/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,9 +25,15 @@ func main() {
 		w.Write([]byte("IceNews Backend"))
 	})
 
-	router.Mount("/auth", routes.AuthRoute(DB))
-	router.Mount("/me", routes.MeRoute(DB))
-	router.Mount("/news", routes.NewsRoute(DB))
+	userRepository := repository.NewUserRepository(DB)
+	userService := service.NewUserService(userRepository)
+
+	newsRepository := repository.NewNewsRepository(DB)
+	newsService := service.NewNewsService(newsRepository)
+
+	router.Mount("/auth", routes.AuthRoute(userService))
+	router.Mount("/me", routes.MeRoute(userService))
+	router.Mount("/news", routes.NewsRoute(newsService))
 
 	http.ListenAndServe(":8080", router)
 }

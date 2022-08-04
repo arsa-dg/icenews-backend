@@ -1,4 +1,4 @@
-package interfaces
+package model
 
 type AuthLoginResponse struct {
 	Token      string `json:"token"`

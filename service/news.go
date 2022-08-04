@@ -2,7 +2,7 @@ package service
 
 import (
 	"icenews/backend/helper"
-	"icenews/backend/interfaces"
+	"icenews/backend/model"
 	"icenews/backend/repository"
 	"net/http"
 	"net/url"
@@ -12,16 +12,23 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
+
+type NewsServiceInterface interface {
+	GetAllLogic(query url.Values) (interface{}, int)
+	GetDetailLogic(id string) (interface{}, int)
+	NewsCategoryLogic() (interface{}, int)
+	AddCommentLogic(requestBody model.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int)
+	CommentListLogic(newsId string) (interface{}, int)
+}
 
 type NewsService struct {
 	Validator      *validator.Validate
-	NewsRepository repository.NewsRepository
+	NewsRepository repository.NewsRepositoryInterface
 }
 
-func NewNewsService(DB *pgx.Conn) NewsService {
-	return NewsService{validator.New(), repository.NewNewsRepository(DB)}
+func NewNewsService(r repository.NewsRepositoryInterface) NewsService {
+	return NewsService{validator.New(), r}
 }
 
 func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
@@ -30,7 +37,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	scope := query.Get("scope")
 
 	if errConvCategory != nil {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "Category Must Be An Integer",
 		}
 
@@ -40,7 +47,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	newsListRaw, err := s.NewsRepository.SelectAll(category, scope)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
@@ -48,7 +55,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	}
 
 	if len(newsListRaw) == 0 {
-		res := interfaces.NewsListResponse{
+		res := model.NewsListResponse{
 			Data: nil,
 		}
 
@@ -59,9 +66,9 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 		return newsListRaw[i].Id < newsListRaw[j].Id
 	})
 
-	newsList := []interfaces.NewsList{}
+	newsList := []model.NewsList{}
 	var newsImage []string
-	news := interfaces.NewsList{}
+	news := model.NewsList{}
 
 	for _, newsRaw := range newsListRaw {
 		if newsRaw.Id != news.Id {
@@ -69,7 +76,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 				news.AdditionalImages = newsImage
 				newsList = append(newsList, news)
 
-				news = interfaces.NewsList{}
+				news = model.NewsList{}
 			}
 			newsImage = []string{}
 
@@ -101,7 +108,7 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	news.AdditionalImages = newsImage
 	newsList = append(newsList, news)
 
-	res := interfaces.NewsListResponse{
+	res := model.NewsListResponse{
 		Data: newsList,
 	}
 
@@ -112,7 +119,7 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 	newsDetailRaw, err := s.NewsRepository.SelectById(id)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
@@ -120,7 +127,7 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 	}
 
 	if len(newsDetailRaw) == 0 {
-		res := interfaces.ResponseBadRequest{
+		res := model.ResponseBadRequest{
 			Message: "News Not Found",
 		}
 
@@ -128,7 +135,7 @@ func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 	}
 
 	var newsImage []string
-	news := interfaces.NewsDetailResponse{}
+	news := model.NewsDetailResponse{}
 
 	for idx, newsRaw := range newsDetailRaw {
 		if newsRaw.AdditionalImage != "" {
@@ -167,21 +174,21 @@ func (s NewsService) NewsCategoryLogic() (interface{}, int) {
 	newsCategory, err := s.NewsRepository.SelectAllCategory()
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
 		return res, http.StatusInternalServerError
 	}
 
-	res := interfaces.NewsCategoryResponse{
+	res := model.NewsCategoryResponse{
 		Data: newsCategory,
 	}
 
 	return res, http.StatusOK
 }
 
-func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int) {
+func (s NewsService) AddCommentLogic(requestBody model.CommentRequest, newsId string, authorId uuid.UUID) (interface{}, int) {
 	errValidateRes, errValidateStatus := helper.RequestValidation(s.Validator, requestBody)
 
 	if errValidateRes != nil {
@@ -190,8 +197,8 @@ func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, news
 
 	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
 
-	if err != nil || len(newsDetailRaw) == 0 {
-		res := interfaces.ResponseBadRequest{
+	if len(newsDetailRaw) == 0 {
+		res := model.ResponseBadRequest{
 			Message: "News Not Found",
 		}
 
@@ -201,14 +208,14 @@ func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, news
 	commentId, err := s.NewsRepository.InsertComment(requestBody.Description, newsId, authorId)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
 		return res, http.StatusInternalServerError
 	}
 
-	res := interfaces.CommentAddResponse{
+	res := model.CommentAddResponse{
 		Id: commentId,
 	}
 
@@ -216,17 +223,27 @@ func (s NewsService) AddCommentLogic(requestBody interfaces.CommentRequest, news
 }
 
 func (s NewsService) CommentListLogic(newsId string) (interface{}, int) {
+	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
+
+	if len(newsDetailRaw) == 0 {
+		res := model.ResponseBadRequest{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
+	}
+
 	commentList, err := s.NewsRepository.SelectCommentByNewsId(newsId)
 
 	if err != nil {
-		res := interfaces.ResponseInternalServerError{
+		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
 		return res, http.StatusInternalServerError
 	}
 
-	res := interfaces.CommentListResponse{
+	res := model.CommentListResponse{
 		Data: commentList,
 	}
 
