@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"icenews/backend/model"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type UserRepositoryInterface interface {
@@ -15,17 +15,17 @@ type UserRepositoryInterface interface {
 }
 
 type UserRepository struct {
-	DB *pgx.Conn
+	DB *sql.DB
 }
 
-func NewUserRepository(DB *pgx.Conn) UserRepository {
+func NewUserRepository(DB *sql.DB) UserRepository {
 	return UserRepository{DB}
 }
 
 func (r UserRepository) SelectByUsername(username string) (model.User, error) {
 	user := model.User{}
 
-	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
+	err := r.DB.QueryRowContext(context.Background(), "SELECT * FROM users WHERE username=$1", username).Scan(
 		&user.Id,
 		&user.Username,
 		&user.Password,
@@ -41,7 +41,7 @@ func (r UserRepository) SelectByUsername(username string) (model.User, error) {
 func (r UserRepository) SelectById(id uuid.UUID) (model.User, error) {
 	user := model.User{}
 
-	err := r.DB.QueryRow(context.Background(), "SELECT * FROM users WHERE id=$1", id).Scan(
+	err := r.DB.QueryRowContext(context.Background(), "SELECT * FROM users WHERE id=$1", id).Scan(
 		&user.Id,
 		&user.Username,
 		&user.Password,
@@ -55,7 +55,7 @@ func (r UserRepository) SelectById(id uuid.UUID) (model.User, error) {
 }
 
 func (r UserRepository) Insert(user model.User) error {
-	_, err := r.DB.Exec(context.Background(), `INSERT INTO
+	_, err := r.DB.ExecContext(context.Background(), `INSERT INTO
 		users(
 			id, username, password, name, bio, web, picture
 		) 

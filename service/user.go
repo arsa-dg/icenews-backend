@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,7 +37,7 @@ func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectByUsername(request.Username)
 
 	// user not found (invalid credentials 401)
-	if errSelect == pgx.ErrNoRows || user.Username == "" {
+	if errSelect != nil || user.Username == "" {
 		res := model.ResponseUnauthorized{
 			Message: "User Not Found",
 		}
@@ -136,7 +135,7 @@ func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, 
 func (s UserService) ProfileLogic(id uuid.UUID) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectById(id)
 
-	if errSelect == pgx.ErrNoRows || user.Username == "" {
+	if errSelect != nil || user.Username == "" {
 		res := model.ResponseBadRequest{
 			Message: "User Not Found",
 		}

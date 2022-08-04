@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"icenews/backend/model"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type NewsRepositoryInterface interface {
@@ -17,15 +17,15 @@ type NewsRepositoryInterface interface {
 }
 
 type NewsRepository struct {
-	DB *pgx.Conn
+	DB *sql.DB
 }
 
-func NewNewsRepository(DB *pgx.Conn) NewsRepository {
+func NewNewsRepository(DB *sql.DB) NewsRepository {
 	return NewsRepository{DB}
 }
 
 func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsListRaw, error) {
-	var rows pgx.Rows
+	var rows *sql.Rows
 	var err error
 	var newsListRaw []model.NewsListRaw
 
@@ -40,20 +40,20 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsLi
 		LEFT JOIN news_images ON news.id = news_images.news_id`
 
 	if category != "" && scope != "" {
-		rows, err = r.DB.Query(context.Background(), query+` WHERE
+		rows, err = r.DB.QueryContext(context.Background(), query+` WHERE
 			news.category_id = $1 AND
 			news.scope = $2;
 		`, category, scope)
 	} else if category != "" {
-		rows, err = r.DB.Query(context.Background(), query+` WHERE
+		rows, err = r.DB.QueryContext(context.Background(), query+` WHERE
 			news.category_id = $1;
 		`, category)
 	} else if scope != "" {
-		rows, err = r.DB.Query(context.Background(), query+` WHERE
+		rows, err = r.DB.QueryContext(context.Background(), query+` WHERE
 			news.scope = $1;
 		`, scope)
 	} else {
-		rows, err = r.DB.Query(context.Background(), query)
+		rows, err = r.DB.QueryContext(context.Background(), query)
 	}
 
 	if err != nil {
@@ -84,7 +84,7 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsLi
 func (r NewsRepository) SelectById(id string) ([]model.NewsDetailRaw, error) {
 	newsDetailRaw := []model.NewsDetailRaw{}
 
-	rows, err := r.DB.Query(context.Background(), `SELECT
+	rows, err := r.DB.QueryContext(context.Background(), `SELECT
 		news.id, news.title, news.content, news.slug_url, news.cover_image, 
 		COALESCE(news_images.image, ''), news.nsfw, categories.id, categories.name, 
 		users.id, users.name, users.picture, news.upvote, news.downvote, 
@@ -122,7 +122,7 @@ func (r NewsRepository) SelectById(id string) ([]model.NewsDetailRaw, error) {
 }
 
 func (r NewsRepository) SelectAllCategory() ([]model.NewsCategory, error) {
-	rows, err := r.DB.Query(context.Background(), "SELECT * FROM categories;")
+	rows, err := r.DB.QueryContext(context.Background(), "SELECT * FROM categories;")
 
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func (r NewsRepository) SelectAllCategory() ([]model.NewsCategory, error) {
 func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.UUID) (int, error) {
 	var commentId int
 
-	err := r.DB.QueryRow(context.Background(), "INSERT INTO comments(description, author_id, news_id) values($1, $2, $3) RETURNING id;",
+	err := r.DB.QueryRowContext(context.Background(), "INSERT INTO comments(description, author_id, news_id) values($1, $2, $3) RETURNING id;",
 		description, authorId, newsId).Scan(&commentId)
 
 	if err != nil {
@@ -159,7 +159,7 @@ func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.
 }
 
 func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]model.Comment, error) {
-	rows, err := r.DB.Query(context.Background(), `SELECT
+	rows, err := r.DB.QueryContext(context.Background(), `SELECT
 		comments.id, comments.description, users.id, users.name, users.picture, 
 		TO_CHAR(comments.created_at, 'YYYY-MM-DD"T"HH:MI:SS"Z')
 		FROM comments 
