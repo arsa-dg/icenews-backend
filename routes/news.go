@@ -13,7 +13,7 @@ func NewsRoute(s service.NewsServiceInterface) chi.Router {
 
 	r := chi.NewRouter()
 
-	r.Use(middleware.MiddlewareAuth)
+	r.Use(middleware.JWT)
 
 	r.Get("/", newsHandler.GetAll)
 	r.Get("/{id:^[0-9]+}", newsHandler.GetDetail)

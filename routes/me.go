@@ -13,7 +13,7 @@ func MeRoute(s service.UserServiceInterface) chi.Router {
 
 	r := chi.NewRouter()
 
-	r.With(middleware.MiddlewareAuth).Get("/profile", meHandler.Profile)
+	r.With(middleware.JWT).Get("/profile", meHandler.Profile)
 
 	return r
 }

@@ -97,7 +97,7 @@ func TestService_GetAllLogicOK(t *testing.T) {
 
 	newsService := NewNewsService(newsRepository)
 
-	apicall, _ := url.Parse("https://icenews.com?category=1&scope=top_news")
+	apicall, _ := url.Parse("https://icenews.com/news?category=1&scope=top_news")
 	params := apicall.Query()
 
 	res, _ := newsService.GetAllLogic(params)
@@ -111,7 +111,7 @@ func TestService_GetAllLogicErrorCategoryNotInteger(t *testing.T) {
 
 	newsService := NewNewsService(newsRepository)
 
-	apicall, _ := url.Parse("https://icenews.com?category=cat1&scope=top_news")
+	apicall, _ := url.Parse("https://icenews.com/news?category=cat1&scope=top_news")
 	params := apicall.Query()
 
 	res, _ := newsService.GetAllLogic(params)

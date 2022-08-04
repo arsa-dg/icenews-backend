@@ -15,7 +15,7 @@ func AuthRoute(s service.UserServiceInterface) chi.Router {
 
 	r.Post("/login", authHandler.Login)
 	r.Post("/register", authHandler.Register)
-	r.With(middleware.MiddlewareAuth).Get("/token", authHandler.Token)
+	r.With(middleware.JWT).Get("/token", authHandler.Token)
 
 	return r
 }

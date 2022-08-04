@@ -13,6 +13,7 @@ import (
 
 type UserServiceInterface interface {
 	LoginLogic(request model.LoginRequest) (interface{}, int)
+	TokenLogic(id string) (interface{}, int)
 	RegisterLogic(request model.RegisterRequest) (interface{}, int)
 	ProfileLogic(id uuid.UUID) (interface{}, int)
 }
@@ -57,6 +58,48 @@ func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 	}
 
 	token, expiresAt, errGenerate := helper.CreateJWT(user.Id.String())
+
+	// internal server error (500)
+	if errGenerate != nil {
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	// OK (200)
+	res := model.AuthLoginResponse{
+		Token:      token,
+		Scheme:     "Bearer",
+		Expires_at: expiresAt,
+	}
+
+	return res, http.StatusOK
+}
+
+func (s UserService) TokenLogic(id string) (interface{}, int) {
+	userIdUUID, errParse := uuid.Parse(id)
+
+	if errParse != nil {
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
+	}
+
+	user, errSelect := s.UserRepository.SelectById(userIdUUID)
+
+	if errSelect != nil || user.Username == "" {
+		res := model.ResponseBadRequest{
+			Message: "User Not Found",
+		}
+
+		return res, http.StatusBadRequest
+	}
+
+	token, expiresAt, errGenerate := helper.CreateJWT(id)
 
 	// internal server error (500)
 	if errGenerate != nil {
