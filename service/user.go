@@ -92,11 +92,11 @@ func (s UserService) TokenLogic(id string) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectById(userIdUUID)
 
 	if errSelect != nil || user.Username == "" {
-		res := model.ResponseBadRequest{
+		res := model.ResponseNotFound{
 			Message: "User Not Found",
 		}
 
-		return res, http.StatusBadRequest
+		return res, http.StatusNotFound
 	}
 
 	token, expiresAt, errGenerate := helper.CreateJWT(id)
@@ -179,11 +179,11 @@ func (s UserService) ProfileLogic(id uuid.UUID) (interface{}, int) {
 	user, errSelect := s.UserRepository.SelectById(id)
 
 	if errSelect != nil || user.Username == "" {
-		res := model.ResponseBadRequest{
+		res := model.ResponseNotFound{
 			Message: "User Not Found",
 		}
 
-		return res, http.StatusBadRequest
+		return res, http.StatusNotFound
 	}
 
 	res := model.MeProfileResponse{

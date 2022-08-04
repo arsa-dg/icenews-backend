@@ -138,7 +138,7 @@ func TestService_GetDetailLogicErrorNewsNotFound(t *testing.T) {
 
 	res, _ := newsService.GetDetailLogic("2")
 
-	assert.IsType(t, model.ResponseBadRequest{}, res)
+	assert.IsType(t, model.ResponseNotFound{}, res)
 }
 
 func TestService_NewsCategoryLogicOK(t *testing.T) {
@@ -175,7 +175,7 @@ func TestService_AddCommentLogicErrorNewsNotFound(t *testing.T) {
 
 	res, _ := newsService.AddCommentLogic(model.CommentRequest{Description: "Bagus"}, "1", users[1].Id)
 
-	assert.IsType(t, model.ResponseBadRequest{}, res)
+	assert.IsType(t, model.ResponseNotFound{}, res)
 }
 
 func TestService_AddCommentLogicErrorValidation(t *testing.T) {
@@ -208,5 +208,5 @@ func TestService_CommentListLogicErrorNewsNotFound(t *testing.T) {
 
 	res, _ := newsService.CommentListLogic("2")
 
-	assert.IsType(t, model.ResponseBadRequest{}, res)
+	assert.IsType(t, model.ResponseNotFound{}, res)
 }
