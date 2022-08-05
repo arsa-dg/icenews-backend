@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"icenews/backend/helper"
 	"icenews/backend/model"
@@ -10,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/rs/zerolog/log"
 )
 
 func JWT(next http.Handler) http.Handler {
@@ -20,6 +22,8 @@ func JWT(next http.Handler) http.Handler {
 		auth := r.Header.Get("Authorization")
 
 		if auth == "" {
+			log.Error().Err(errors.New("Authorization is missing")).Msg("Error token is missing")
+
 			res := model.ResponseUnauthorized{
 				Message: "Authorization is missing",
 			}
@@ -43,6 +47,8 @@ func JWT(next http.Handler) http.Handler {
 				ctx := context.WithValue(r.Context(), "user_id", userId)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
+				log.Error().Err(err).Msg("Error validate jwt token")
+
 				res := model.ResponseUnauthorized{
 					Message: err.Error(),
 				}
