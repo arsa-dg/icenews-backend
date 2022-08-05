@@ -1,1 +1,1 @@
-migrate -path store/database -database postgres://postgres:password@localhost:5432/icenews?sslmode=disable up
+migrate -path migrations -database postgres://postgres:password@localhost:5432/icenews?sslmode=disable up
