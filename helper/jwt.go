@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/rs/zerolog/log"
 )
 
 func CreateJWT(id string) (string, string, error) {
@@ -21,6 +22,10 @@ func CreateJWT(id string) (string, string, error) {
 	})
 
 	tokenString, err := token.SignedString([]byte(secretKey))
+
+	if err != nil {
+		log.Error().Err(err).Msg("Error while creating JWT token")
+	}
 
 	return tokenString, expiresAtString, err
 }

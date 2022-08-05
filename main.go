@@ -18,6 +18,7 @@ import (
 func main() {
 	_ = godotenv.Load(".env")
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Info().Msg("Server is listening on port 8080")
 
 	DB := config.ConnectDB()
 

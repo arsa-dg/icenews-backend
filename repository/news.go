@@ -6,6 +6,7 @@ import (
 	"icenews/backend/model"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type NewsRepositoryInterface interface {
@@ -57,6 +58,10 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsLi
 	}
 
 	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Error().Err(err).Msg("Error select all news")
+		}
+
 		return nil, err
 	}
 
@@ -72,6 +77,8 @@ func (r NewsRepository) SelectAll(category string, scope string) ([]model.NewsLi
 		)
 
 		if errScan != nil {
+			log.Error().Err(err).Msg("Error scan select news")
+
 			return nil, errScan
 		}
 
@@ -97,6 +104,8 @@ func (r NewsRepository) SelectById(id string) ([]model.NewsDetailRaw, error) {
 	`, id)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error select news by id")
+
 		return nil, err
 	}
 
@@ -112,6 +121,8 @@ func (r NewsRepository) SelectById(id string) ([]model.NewsDetailRaw, error) {
 		)
 
 		if errScan != nil {
+			log.Error().Err(err).Msg("Error scan select news")
+
 			return nil, errScan
 		}
 
@@ -125,6 +136,8 @@ func (r NewsRepository) SelectAllCategory() ([]model.NewsCategory, error) {
 	rows, err := r.DB.QueryContext(context.Background(), "SELECT * FROM categories;")
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error select all category")
+
 		return nil, err
 	}
 
@@ -136,6 +149,8 @@ func (r NewsRepository) SelectAllCategory() ([]model.NewsCategory, error) {
 		errScan := rows.Scan(&category.Id, &category.Name)
 
 		if errScan != nil {
+			log.Error().Err(err).Msg("Error scan category")
+
 			return nil, errScan
 		}
 
@@ -152,6 +167,8 @@ func (r NewsRepository) InsertComment(description, newsId string, authorId uuid.
 		description, authorId, newsId).Scan(&commentId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error insert comment")
+
 		return -1, err
 	}
 
@@ -168,6 +185,8 @@ func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]model.Comment, e
 	`, newsId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error select comments by news id")
+
 		return nil, err
 	}
 
@@ -183,6 +202,8 @@ func (r NewsRepository) SelectCommentByNewsId(newsId string) ([]model.Comment, e
 		)
 
 		if errScan != nil {
+			log.Error().Err(err).Msg("Error scan comments")
+
 			return nil, errScan
 		}
 

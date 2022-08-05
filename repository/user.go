@@ -6,6 +6,7 @@ import (
 	"icenews/backend/model"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type UserRepositoryInterface interface {
@@ -35,6 +36,10 @@ func (r UserRepository) SelectByUsername(username string) (model.User, error) {
 		&user.Picture,
 	)
 
+	if err != nil {
+		log.Error().Err(err).Msg("Error select user by username")
+	}
+
 	return user, err
 }
 
@@ -51,6 +56,10 @@ func (r UserRepository) SelectById(id uuid.UUID) (model.User, error) {
 		&user.Picture,
 	)
 
+	if err != nil {
+		log.Error().Err(err).Msg("Error select user by id")
+	}
+
 	return user, err
 }
 
@@ -63,6 +72,10 @@ func (r UserRepository) Insert(user model.User) error {
 			$1, $2, $3, $4, $5, $6, $7
 		)
 	`, user.Id, user.Username, user.Password, user.Name, user.Bio, user.Web, user.Picture)
+
+	if err != nil {
+		log.Error().Err(err).Msg("Error insert user")
+	}
 
 	return err
 }

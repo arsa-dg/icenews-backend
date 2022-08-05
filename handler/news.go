@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type NewsHandlerInterface interface {
@@ -71,6 +72,8 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error decode request body")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
@@ -84,6 +87,8 @@ func (h NewsHandler) AddComment(w http.ResponseWriter, r *http.Request) {
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error parse user id")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}

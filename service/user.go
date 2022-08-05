@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"icenews/backend/helper"
 	"icenews/backend/model"
 	"icenews/backend/repository"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,6 +52,8 @@ func (s UserService) LoginLogic(request model.LoginRequest) (interface{}, int) {
 
 	// wrong password (invalid credentials 401)
 	if errPass == bcrypt.ErrMismatchedHashAndPassword {
+		log.Error().Err(errPass).Msg("Error password mismatch")
+
 		res := model.ResponseUnauthorized{
 			Message: "Wrong Password",
 		}
@@ -82,6 +86,8 @@ func (s UserService) TokenLogic(id string) (interface{}, int) {
 	userIdUUID, errParse := uuid.Parse(id)
 
 	if errParse != nil {
+		log.Error().Err(errParse).Msg("Error parse user id")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
@@ -130,6 +136,8 @@ func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, 
 	user, errSelect := s.UserRepository.SelectByUsername(request.Username)
 
 	if errSelect == nil || user.Username == request.Username {
+		log.Error().Err(errors.New("Username is Not Available")).Msg("Error username is taken")
+
 		res := model.ResponseBadRequest{
 			Message: "Username Is Not Available",
 		}
@@ -140,6 +148,8 @@ func (s UserService) RegisterLogic(request model.RegisterRequest) (interface{}, 
 	hashPass, errGenerate := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 
 	if errGenerate != nil {
+		log.Error().Err(errGenerate).Msg("Error generate hash password")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}

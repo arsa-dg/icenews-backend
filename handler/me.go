@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type MeHandlerInterface interface {
@@ -26,6 +27,8 @@ func (h MeHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	userIdUUID, err := uuid.Parse(userId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error parse user id")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}

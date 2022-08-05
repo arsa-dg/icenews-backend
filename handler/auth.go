@@ -6,6 +6,8 @@ import (
 	"icenews/backend/model"
 	"icenews/backend/service"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 )
 
 type AuthHandlerInterface interface {
@@ -27,6 +29,8 @@ func (h AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error decode request body")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
@@ -64,6 +68,8 @@ func (h AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&field)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error decode request body")
+
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
