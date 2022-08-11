@@ -1,0 +1,51 @@
+version: "3.7"
+
+services:
+  app:
+    env_file:
+      - .env
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    networks:
+    - backend
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - 5432:5432
+    volumes:
+      - icenews:/var/lib/postgresql/data
+    networks:
+      backend:
+        aliases:
+          - postgres
+
+  migrate:
+    image: migrate/migrate
+    networks:
+      - backend
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:password@postgres:5432/icenews?sslmode=disable", "up"]
+    depends_on: 
+      - db
+
+volumes:
+  icenews:
+
+networks:
+  backend:

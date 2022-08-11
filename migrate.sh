@@ -1,0 +1,1 @@
+migrate -path migrations -database postgres://postgres:password@localhost:5432/icenews?sslmode=disable up
