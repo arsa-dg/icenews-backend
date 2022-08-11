@@ -100,7 +100,7 @@ func TestService_TokenLogicErrorUserNotFound(t *testing.T) {
 	userService := NewUserService(userRepository)
 	res, _ := userService.TokenLogic("9237d1b5-051d-41d5-b160-cde2d6ebf61b")
 
-	assert.IsType(t, model.ResponseBadRequest{}, res)
+	assert.IsType(t, model.ResponseNotFound{}, res)
 }
 
 func TestService_RegisterLogicOK(t *testing.T) {
@@ -176,5 +176,5 @@ func TestService_ProfileLogicErrorUserNotFound(t *testing.T) {
 	userService := NewUserService(userRepository)
 	res, _ := userService.ProfileLogic(uuid3)
 
-	assert.IsType(t, model.ResponseBadRequest{}, res)
+	assert.IsType(t, model.ResponseNotFound{}, res)
 }

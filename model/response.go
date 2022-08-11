@@ -56,6 +56,10 @@ type ResponseUnauthorized struct {
 	Message string `json:"message"`
 }
 
+type ResponseNotFound struct {
+	Message string `json:"message"`
+}
+
 type FieldError struct {
 	Name  string `json:"name"`
 	Error string `json:"error"`

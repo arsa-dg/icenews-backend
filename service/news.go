@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type NewsServiceInterface interface {
@@ -37,6 +38,8 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 	scope := query.Get("scope")
 
 	if errConvCategory != nil {
+		log.Error().Err(errConvCategory).Msg("Error wrong category format (not integer)")
+
 		res := model.ResponseBadRequest{
 			Message: "Category Must Be An Integer",
 		}
@@ -46,20 +49,20 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 
 	newsListRaw, err := s.NewsRepository.SelectAll(category, scope)
 
-	if err != nil {
-		res := model.ResponseInternalServerError{
-			Message: "Something Is Wrong",
-		}
-
-		return res, http.StatusInternalServerError
-	}
-
 	if len(newsListRaw) == 0 {
 		res := model.NewsListResponse{
 			Data: nil,
 		}
 
 		return res, http.StatusOK
+	}
+
+	if err != nil {
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
 	}
 
 	sort.Slice(newsListRaw, func(i, j int) bool {
@@ -118,20 +121,20 @@ func (s NewsService) GetAllLogic(query url.Values) (interface{}, int) {
 func (s NewsService) GetDetailLogic(id string) (interface{}, int) {
 	newsDetailRaw, err := s.NewsRepository.SelectById(id)
 
+	if len(newsDetailRaw) == 0 {
+		res := model.ResponseNotFound{
+			Message: "News Not Found",
+		}
+
+		return res, http.StatusNotFound
+	}
+
 	if err != nil {
 		res := model.ResponseInternalServerError{
 			Message: "Something Is Wrong",
 		}
 
 		return res, http.StatusInternalServerError
-	}
-
-	if len(newsDetailRaw) == 0 {
-		res := model.ResponseBadRequest{
-			Message: "News Not Found",
-		}
-
-		return res, http.StatusNotFound
 	}
 
 	var newsImage []string
@@ -198,11 +201,19 @@ func (s NewsService) AddCommentLogic(requestBody model.CommentRequest, newsId st
 	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
 
 	if len(newsDetailRaw) == 0 {
-		res := model.ResponseBadRequest{
+		res := model.ResponseNotFound{
 			Message: "News Not Found",
 		}
 
 		return res, http.StatusNotFound
+	}
+
+	if err != nil {
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
 	}
 
 	commentId, err := s.NewsRepository.InsertComment(requestBody.Description, newsId, authorId)
@@ -226,11 +237,19 @@ func (s NewsService) CommentListLogic(newsId string) (interface{}, int) {
 	newsDetailRaw, err := s.NewsRepository.SelectById(newsId)
 
 	if len(newsDetailRaw) == 0 {
-		res := model.ResponseBadRequest{
+		res := model.ResponseNotFound{
 			Message: "News Not Found",
 		}
 
 		return res, http.StatusNotFound
+	}
+
+	if err != nil {
+		res := model.ResponseInternalServerError{
+			Message: "Something Is Wrong",
+		}
+
+		return res, http.StatusInternalServerError
 	}
 
 	commentList, err := s.NewsRepository.SelectCommentByNewsId(newsId)

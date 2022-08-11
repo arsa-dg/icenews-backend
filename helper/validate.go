@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
 )
 
 func ErrMsg(tag string) string {
@@ -26,6 +27,8 @@ func RequestValidation(Validator *validator.Validate, request interface{}) (inte
 	errValidate := Validator.Struct(request)
 
 	if errValidate != nil {
+		log.Error().Err(errValidate).Msg("Incorrect request fields format")
+
 		res := model.ResponseValidationFailed{
 			Message: "Field(s) validation error",
 		}
